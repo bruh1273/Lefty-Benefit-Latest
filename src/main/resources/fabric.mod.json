@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "leftybenefit",
+  "version": "${version}",
+  "name": "Lefty's Benefit",
+  "description": "Super useful addons for duping/hunting.",
+  "authors": [
+    "Lefty Dupes"
+  ],
+  "contact": {
+    "homepage": "https://discord.gg/lefty",
+    "sources": "https://discord.gg/lefty"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/benefit/LeftyDupes.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "org.benefit.Client"
+    ]
+  },
+  "mixins": [
+    "benefit.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.17",
+    "fabric": "*", "minecraft": "~1.19.4",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
