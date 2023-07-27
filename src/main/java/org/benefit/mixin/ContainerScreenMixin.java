@@ -29,13 +29,13 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
         super.init();
 
         //create input text box
-        textBox = new TextFieldWidget(mc.textRenderer, 88, 255, 100, 20, Text.of("Command"));
+        textBox = new TextFieldWidget(mc.textRenderer, 88, 250, 100, 20, Text.of("Command"));
         textBox.setText(Variables.lastCommand);
         textBox.setMaxLength(65535);
         textBox.setFocused(true);
 
         //render the send chat button
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Send chat"), button -> sendChat()).dimensions(5, 255, 80, 20).build());
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Send chat"), button -> sendChat()).dimensions(5, 250, 80, 20).build());
 
         //render get name button
         this.addDrawableChild(ButtonWidget.builder(Text.of("Get Name"), button -> {
@@ -43,7 +43,7 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
             mc.player.sendMessage(Text.literal("Container Name: ").append(title));
             //automatically copy the title to clipboard when called
             mc.keyboard.setClipboard(title.getString());
-        }).dimensions(4, 225, 80, 20).build());
+        }).dimensions(4, 220, 80, 20).build());
     }
 
     private void sendChat() {
@@ -103,7 +103,7 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
     public boolean mouseClicked(double mX, double mY, int b) {
         return textBox.mouseClicked(mX, mY, b) || super.mouseClicked(mX, mY, b);
     }
-    
+
     @Override
     public void removed() {
         Variables.lastCommand = textBox.getText();
