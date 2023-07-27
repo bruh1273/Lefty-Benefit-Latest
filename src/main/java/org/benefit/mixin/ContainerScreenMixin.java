@@ -6,6 +6,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.benefit.*;
 import org.spongepowered.asm.mixin.Unique;
@@ -34,13 +35,7 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
         textBox.setFocused(true);
 
         //render the send chat button
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Send chat"), button -> {
-            String s = textBox.getText();
-            //condition to see if the inputted text starts with a /, and if it doesn't, send a normal chat message instead of a command
-            if (s.startsWith("/")) {
-                mc.player.networkHandler.sendChatCommand(s.substring(1));
-            } else mc.player.networkHandler.sendChatMessage(s);
-        }).dimensions(5, 255, 80, 20).build());
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Send chat"), button -> sendChat()).dimensions(5, 255, 80, 20).build());
 
         //render get name button
         this.addDrawableChild(ButtonWidget.builder(Text.of("Get Name"), button -> {
@@ -49,6 +44,18 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
             //automatically copy the title to clipboard when called
             mc.keyboard.setClipboard(title.getString());
         }).dimensions(4, 225, 80, 20).build());
+    }
+
+    private void sendChat() {
+        //send message
+        String s = textBox.getText();
+        if (s.startsWith("/")) {
+            mc.player.networkHandler.sendChatCommand(s.substring(1));
+        } else mc.player.networkHandler.sendChatMessage(s);
+
+        //reset state
+        textBox.setText("");
+        Variables.lastCommand = "";
     }
 
     /**
@@ -67,9 +74,7 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public boolean charTyped(char chr, int keyCode) {
-        textBox.charTyped(chr, keyCode);
-        Variables.lastCommand = textBox.getText();
-        return super.charTyped(chr, keyCode);
+        return textBox.charTyped(chr, keyCode) || super.charTyped(chr, keyCode);
     }
 
     /**
@@ -77,9 +82,7 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int m) {
-        textBox.keyReleased(keyCode, scanCode, m);
-        Variables.lastCommand = textBox.getText();
-        return super.keyReleased(keyCode, scanCode, m);
+        return textBox.keyReleased(keyCode, scanCode, m) || super.keyReleased(keyCode, scanCode, m);
     }
 
     /**
@@ -87,9 +90,10 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int m) {
-        textBox.keyPressed(keyCode, scanCode, m);
-        Variables.lastCommand = textBox.getText();
-        return super.keyPressed(keyCode, scanCode, m);
+        if (textBox.isFocused() && keyCode == GLFW.GLFW_KEY_ENTER) {
+            sendChat();
+            return true;
+        } else return textBox.keyPressed(keyCode, scanCode, m) || super.keyPressed(keyCode, scanCode, m);
     }
 
     /**
@@ -97,8 +101,11 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public boolean mouseClicked(double mX, double mY, int b) {
-        textBox.mouseClicked(mX, mY, b);
+        return textBox.mouseClicked(mX, mY, b) || super.mouseClicked(mX, mY, b);
+    }
+    
+    @Override
+    public void removed() {
         Variables.lastCommand = textBox.getText();
-        return super.mouseClicked(mX, mY, b);
     }
 }
