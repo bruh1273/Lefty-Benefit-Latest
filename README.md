@@ -1,6 +1,7 @@
 # Lefty's Benefit. https://discord.gg/lefty
 ---
 - <!> DISCLAIMER <!> NOT MY ORIGINAL MOD. ORIGINAL MOD CREDIT GOES TO Ui Utils by Coderx_Gamer (https://github.com/Coderx-Gamer/ui-utils) and konoashi#9999 on discord
+- Shoutouts to Crosby.dev on Discord for some great improvements.
 - Here's how you use the mods, Fabric API is required for this mod to work.
 ---
 
