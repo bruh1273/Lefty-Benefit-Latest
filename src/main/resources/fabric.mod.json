@@ -8,10 +8,11 @@
     "Lefty Dupes"
   ],
   "contact": {
-    "homepage": "https://discord.gg/lefty",
-    "sources": "https://discord.gg/lefty"
+    "discord": "https://discord.gg/lefty",
+    "sources": "https://github.com/bruh1273/Lefty-Benefit-Latest",
+    "issues": "https://github.com/bruh1273/Lefty-Benefit-Latest/issues"
   },
-  "license": "All-Rights-Reserved",
+  "license": "ARR",
   "icon": "assets/benefit/LeftyDupes.png",
   "environment": "client",
   "entrypoints": {
@@ -24,10 +25,10 @@
   ],
   "depends": {
     "fabricloader": ">=0.14.17",
-    "fabric": "*", "minecraft": "~1.19.4",
+    "fabric-resource-loader-v0": "*",
+    "fabric-lifecycle-events-v1": "*",
+    "fabric-key-binding-api-v1": "*",
+    "minecraft": "~1.19.4",
     "java": ">=17"
-  },
-  "suggests": {
-    "another-mod": "*"
   }
 }
