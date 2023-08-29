@@ -22,13 +22,5 @@
   },
   "mixins": [
     "benefit.mixins.json"
-  ],
-  "depends": {
-    "fabricloader": ">=0.14.17",
-    "fabric-resource-loader-v0": "*",
-    "fabric-lifecycle-events-v1": "*",
-    "fabric-key-binding-api-v1": "*",
-    "minecraft": "~1.19.4",
-    "java": ">=17"
-  }
+  ]
 }

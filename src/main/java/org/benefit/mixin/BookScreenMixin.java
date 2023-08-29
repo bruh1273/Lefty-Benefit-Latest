@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static org.benefit.Client.mc;
+import static org.benefit.Client.restoreScreenBind;
 
 
 @Mixin(BookScreen.class)
@@ -25,6 +26,10 @@ public abstract class BookScreenMixin extends Screen {
 
     @Inject(at = @At("TAIL"), method = "init")
     public void init(CallbackInfo ci) {
+        //we're assuming that MinecraftClient.getInstance().player is never going to be equal to null when this code is ran.
+        //this assert statement will not impact your game at all unless you have the JVM flag -ea or -enableassertions enabled.
+        assert mc.player != null;
+
         //simplify expressions
         String bGray = Formatting.BOLD.toString() + Formatting.GRAY;
         String bGreen = Formatting.BOLD.toString() + Formatting.GREEN;
@@ -79,6 +84,8 @@ public abstract class BookScreenMixin extends Screen {
             //define variables
             Variables.storedScreen = mc.currentScreen;
             Variables.storedScreenHandler = mc.player.currentScreenHandler;
+            mc.setScreen(null);
+            mc.player.sendMessage(Text.literal("Screen §asuccessfully §rsaved! Press §a" + restoreScreenBind.getString() + " §rto restore it!"));
         }).width(80).position(4, 130).build());
 
         //add in leave n send packets button

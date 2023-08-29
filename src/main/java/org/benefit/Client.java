@@ -6,10 +6,14 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
 import org.lwjgl.glfw.GLFW;
 
 public class Client implements ClientModInitializer {
     public static final MinecraftClient mc = MinecraftClient.getInstance();
+    public static Text restoreScreenBind;
+
 
     @Override
     public void onInitializeClient() {
@@ -23,9 +27,14 @@ public class Client implements ClientModInitializer {
         System.out.println("\033[38;2;50;205;50mLefty Benefit Successfully Initialized, Thanks to Lefty Dupes!\033[0m");
 
         //register keybind for restoring screen
-        KeyBinding restoreScreenKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("benefit.key.restoreScreen", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, "UI Utils"));
+        KeyBinding restoreScreenKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("benefit.key.restoreScreen", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, "Benefit"));
 
         ClientTickEvents.END_CLIENT_TICK.register((client) -> {
+            //we're assuming that client.player is never going to be equal to null when this code is ran.
+            //this assert statement will not impact your game at all unless you have the JVM flag -ea or -enableassertions enabled.
+            assert client.player != null;
+            restoreScreenBind = restoreScreenKey.getBoundKeyLocalizedText();
+
             if (restoreScreenKey.wasPressed() && Variables.storedScreen != null && Variables.storedScreenHandler != null) {
                 client.setScreen(Variables.storedScreen);
                 client.player.currentScreenHandler = Variables.storedScreenHandler;

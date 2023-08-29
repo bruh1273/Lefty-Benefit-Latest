@@ -4,9 +4,12 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextWidget;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Formatting;
 import org.benefit.Variables;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static org.benefit.Client.mc;
+import static org.benefit.Client.restoreScreenBind;
 
 
 @Mixin(HandledScreen.class)
@@ -26,6 +30,10 @@ public abstract class HandledScreenMixin extends Screen {
     //the main method
     @Inject(at = @At("TAIL"), method = "init")
     public void init(CallbackInfo ci) {
+        //we're assuming that MinecraftClient.getInstance().player is never going to be equal to null when this code is ran.
+        //this assert statement will not impact your game at all unless you have the JVM flag -ea or -enableassertions enabled.
+        assert mc.player != null;
+
         //simplify expressions
         String bGray = Formatting.BOLD.toString() + Formatting.GRAY;
         String bGreen = Formatting.BOLD.toString() + Formatting.GREEN;
@@ -72,7 +80,7 @@ public abstract class HandledScreenMixin extends Screen {
         //add in desync button
         addDrawableChild(ButtonWidget.builder(Text.of("De-sync"), (button) -> {
             int syncID = mc.player.currentScreenHandler.syncId;
-            mc.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(syncID));
+            mc.getNetworkHandler().getConnection().send(new CloseHandledScreenC2SPacket(syncID));
         }).width(80).position(4, 190).build());
 
         //add in save ui button
@@ -80,6 +88,8 @@ public abstract class HandledScreenMixin extends Screen {
             //define variables
             Variables.storedScreen = mc.currentScreen;
             Variables.storedScreenHandler = mc.player.currentScreenHandler;
+            mc.setScreen(null);
+            mc.player.sendMessage(Text.literal("Screen §asuccessfully §rsaved! Press §a" + restoreScreenBind.getString() + " §rto restore it!"));
         }).width(80).position(4, 130).build());
 
         //add in leave n send packets button

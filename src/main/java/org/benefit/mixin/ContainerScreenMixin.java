@@ -1,5 +1,6 @@
 package org.benefit.mixin;
 
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.client.util.math.MatrixStack;
@@ -27,6 +28,8 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
     @Override
     protected void init() {
         super.init();
+        //we're assuming that MinecraftClient.getInstance().player is never going to be null when this code is ran.
+        assert mc.player != null;
 
         //create input text box
         textBox = new TextFieldWidget(mc.textRenderer, 88, 250, 100, 20, Text.of("Command"));
@@ -46,7 +49,11 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
         }).dimensions(4, 220, 80, 20).build());
     }
 
+    @Unique
     private void sendChat() {
+        //we're assuming that MinecraftClient.getInstance().player is never going to be null when this code is ran.
+        assert mc.player != null;
+
         //send message
         String s = textBox.getText();
         if (s.startsWith("/")) {
@@ -62,11 +69,11 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      * define calculations for the text box
      */
     @Override
-    public void render(MatrixStack Matrices, int MouseX, int MouseY, float Delta) {
-        this.renderBackground(Matrices);
-        super.render(Matrices, MouseX, MouseY, Delta);
-        this.drawMouseoverTooltip(Matrices, MouseX, MouseY);
-        textBox.render(Matrices, MouseX, MouseY, Delta);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderBackground(context);
+        super.render(context, mouseX, mouseY, delta);
+        this.drawMouseoverTooltip(context, mouseX, mouseY);
+        textBox.render(context, mouseX, mouseY, delta);
     }
 
     /**
