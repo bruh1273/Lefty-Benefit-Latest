@@ -15,17 +15,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(CommandManager.class)
 public class CommandManagerMixin {
-@Mutable
-@Final
-@Shadow
-private final CommandDispatcher<ServerCommandSource> dispatcher;
+    @Mutable
+    @Final
+    @Shadow
+    private final CommandDispatcher<ServerCommandSource> dispatcher;
 
     public CommandManagerMixin(CommandDispatcher<ServerCommandSource> dispatcher) {
         this.dispatcher = dispatcher;
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
-private void registerChaseCommand(CommandManager.RegistrationEnvironment environment, CommandRegistryAccess commandRegistryAccess, CallbackInfo ci) {
+    private void registerChaseCommand(CommandManager.RegistrationEnvironment environment, CommandRegistryAccess commandRegistryAccess, CallbackInfo ci) {
         ChaseCommand.register(this.dispatcher);
-            }
-        }
+    }
+}

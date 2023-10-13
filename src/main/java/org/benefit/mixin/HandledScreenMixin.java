@@ -4,12 +4,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Formatting;
 import org.benefit.Variables;
 import org.spongepowered.asm.mixin.Mixin;
@@ -63,9 +60,9 @@ public abstract class HandledScreenMixin extends Screen {
 
             //condition to see if any delayed packets was delayed, then send them
             if (!Variables.delayUIPackets && !Variables.delayedPackets.isEmpty()) {
-                for (Packet<?> packet : Variables.delayedPackets) {
+                for (Packet<?> packet : Variables.delayedPackets)
                     mc.getNetworkHandler().sendPacket(packet);
-                }
+
 
                 //add in message to say how many delayed packets were sent
                 int DelayedPacketsCount = Variables.delayedPackets.size();
@@ -80,7 +77,7 @@ public abstract class HandledScreenMixin extends Screen {
         //add in desync button
         addDrawableChild(ButtonWidget.builder(Text.of("De-sync"), (button) -> {
             int syncID = mc.player.currentScreenHandler.syncId;
-            mc.getNetworkHandler().getConnection().send(new CloseHandledScreenC2SPacket(syncID));
+            mc.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(syncID));
         }).width(80).position(4, 190).build());
 
         //add in save ui button

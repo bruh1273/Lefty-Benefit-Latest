@@ -7,12 +7,10 @@
     "BookScreenMixin",
     "ClientConnectionMixin",
     "ContainerScreenMixin",
-    "HandledScreenMixin"
+    "HandledScreenMixin",
+    "CommandManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-    "CommandManagerMixin"
-  ]
+  }
 }
