@@ -7,8 +7,7 @@
     "BookScreenMixin",
     "ClientConnectionMixin",
     "ContainerScreenMixin",
-    "HandledScreenMixin",
-    "CommandManagerMixin"
+    "HandledScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
