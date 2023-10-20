@@ -1,15 +1,17 @@
 package org.benefit.mixin;
 
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.*;
-import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.text.Text;
+import org.benefit.Variables;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
-import org.benefit.*;
 import org.spongepowered.asm.mixin.Unique;
 
 import static org.benefit.Client.mc;
@@ -56,9 +58,8 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
 
         //send message
         String s = textBox.getText();
-        if (s.startsWith("/")) {
-            mc.player.networkHandler.sendChatCommand(s.substring(1));
-        } else mc.player.networkHandler.sendChatMessage(s);
+        if (s.startsWith("/")) mc.player.networkHandler.sendChatCommand(s.substring(1));
+        else mc.player.networkHandler.sendChatMessage(s);
 
         //reset state
         textBox.setText("");

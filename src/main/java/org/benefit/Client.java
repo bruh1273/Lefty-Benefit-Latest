@@ -4,16 +4,18 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 import org.lwjgl.glfw.GLFW;
 
 public class Client implements ClientModInitializer {
     public static final MinecraftClient mc = MinecraftClient.getInstance();
     public static Text restoreScreenBind;
-
+    public static int txtColor = 0xFF828282;
 
     @Override
     public void onInitializeClient() {
@@ -40,5 +42,19 @@ public class Client implements ClientModInitializer {
                 client.player.currentScreenHandler = Variables.storedScreenHandler;
             }
         });
+    }
+
+    public static void addText(DrawContext context, TextRenderer textRenderer, MinecraftClient client, int x, int y) {
+        for(Slot slot : client.player.currentScreenHandler.slots) {
+            Text id = Text.literal(""+slot.id);
+            context.drawText(
+                    textRenderer,
+                    id,
+                    (slot.x + x + 16 / 2 - textRenderer.getWidth(id) / 2),
+                    (slot.y + y + 16 / 2 - textRenderer.fontHeight / 2),
+                    txtColor,
+                    false
+            );
+        }
     }
 }

@@ -1,5 +1,6 @@
 package org.benefit.mixin;
 
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -8,8 +9,11 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.benefit.Client;
 import org.benefit.Variables;
+import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -20,6 +24,10 @@ import static org.benefit.Client.restoreScreenBind;
 
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin extends Screen {
+    @Shadow protected int x;
+
+    @Shadow protected int y;
+
     protected HandledScreenMixin(Text title) {
         super(title);
     }
@@ -106,5 +114,34 @@ public abstract class HandledScreenMixin extends Screen {
                 Variables.delayedPackets.clear();
             }
         }).width(140).position(4, 160).build());
+    }
+
+    @Inject(at = @At("RETURN"), method = "render")
+    public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        // Add in slot overlay
+        Client.addText(context, client.textRenderer, client, this.x, this.y);
+    }
+
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        // Release any alt key and the color of the slot overlay will go away.
+        final int clr = 0xFF828282;
+        if(
+                keyCode == GLFW.GLFW_KEY_LEFT_ALT
+                        || keyCode == GLFW.GLFW_KEY_RIGHT_ALT
+                        && Client.txtColor != clr
+        ) Client.txtColor = clr;
+        return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        // If you're holding any alt key it will change slot overlay to white.
+        if(
+                keyCode == GLFW.GLFW_KEY_LEFT_ALT
+                        || keyCode == GLFW.GLFW_KEY_RIGHT_ALT
+                        && Client.txtColor != -1
+        ) Client.txtColor = -1;
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }

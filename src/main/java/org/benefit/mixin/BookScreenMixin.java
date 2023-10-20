@@ -59,10 +59,7 @@ public abstract class BookScreenMixin extends Screen {
 
             //condition to see if any delayed packets was delayed, then send them
             if (!Variables.delayUIPackets && !Variables.delayedPackets.isEmpty()) {
-                for (Packet<?> packet : Variables.delayedPackets) {
-                    mc.getNetworkHandler().sendPacket(packet);
-                }
-
+                for (Packet<?> packet : Variables.delayedPackets) mc.getNetworkHandler().sendPacket(packet);
                 //add in message to say how many delayed packets were sent
                 int DelayedPacketsCount = Variables.delayedPackets.size();
                 mc.player.sendMessage(Text.of(bGray + "Successfully sent " + bGreen + DelayedPacketsCount + Formatting.GRAY + " delayed packets."));
