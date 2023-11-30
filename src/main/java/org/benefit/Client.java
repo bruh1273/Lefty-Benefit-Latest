@@ -1,25 +1,36 @@
 package org.benefit;
 
+import com.mojang.serialization.Codec;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.option.SimpleOption;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.benefit.LayoutMode.*;
+
 public class Client implements ClientModInitializer {
     public static final MinecraftClient mc = MinecraftClient.getInstance();
+    public static final Config config = new Config();
     public static Text restoreScreenBind;
     public static int txtColor = 0xFF828282;
 
     @Override
     public void onInitializeClient() {
-        //add console text on game close
+
+        // Add console text on game close
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("\033[38;2;50;205;50mShutting Down Lefty's Benefit...\033[0m");
             System.out.println("\033[38;2;50;205;50mLefty's Benefit Successfully Shut Down!\033[0m");
@@ -57,4 +68,52 @@ public class Client implements ClientModInitializer {
             );
         }
     }
+
+    public static void renderTexts(DrawContext context, TextRenderer textRenderer, MinecraftClient client) {
+        Text syncId = Text.of("Sync Id: " + mc.player.currentScreenHandler.syncId);
+        Text revision = Text.of("Revision: " + mc.player.currentScreenHandler.getRevision());
+        int xss = client.getWindow().getScaledWidth() - textRenderer.getWidth(syncId) - 4;
+        int xrr = client.getWindow().getScaledWidth() - textRenderer.getWidth(revision) - 4;
+        int xs = (client.getWindow().getScaledWidth() - 82) - (textRenderer.getWidth(syncId) + 4);
+        int xr = (client.getWindow().getScaledWidth() - 82) - (textRenderer.getWidth(revision) + 4);
+        int ys = LayoutPos.baseY() + 1;
+        int yr = LayoutPos.baseY() + 11;
+        switch(config.getLayoutMode()) {
+            case TOP_LEFT -> {
+                context.drawText(textRenderer, syncId, 4, 5, -1, false);
+                context.drawText(textRenderer, revision, 4, 20, -1, false);
+            }
+            case TOP_RIGHT -> {
+                context.drawText(textRenderer, syncId, xss, 5, -1, false);
+                context.drawText(textRenderer, revision, xrr, 20, -1, false);
+            }
+            case BOTTOM_LEFT -> {
+                context.drawText(textRenderer, syncId, 88, ys, -1, false);
+                context.drawText(textRenderer, revision, 88, yr, -1, false);
+            }
+            case BOTTOM_RIGHT -> {
+                context.drawText(textRenderer, syncId, xs, ys, -1, false);
+                context.drawText(textRenderer, revision, xr, yr, -1, false);
+            }
+        }
+    }
+
+    private static final SimpleOption<LayoutMode> format = new SimpleOption<>("benefit.format", SimpleOption.constantTooltip(Text.translatable("benefit.format.tooltip")), (optionText, value) ->
+            Text.translatable(value.getTranslationKey()),
+            new SimpleOption.AlternateValuesSupportingCyclingCallbacks<>(
+                    Arrays.asList(LayoutMode.values()),
+                    Stream.of(LayoutMode.values()).collect(Collectors.toList()),
+                    mc::isRunning,
+                    SimpleOption::setValue,
+                    Codec.INT.xmap(LayoutMode::byId, LayoutMode::getId)),
+            config.getLayoutMode(), value -> {
+                config.setLayout(value);
+                config.save();
+            });
+
+    public static SimpleOption<LayoutMode> getFormat() {
+        return format;
+    }
+
+
 }

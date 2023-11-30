@@ -9,15 +9,22 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+repositories {
+	maven { url = 'https://api.modrinth.com/maven' }
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-	//Fabric API
+	// Fabric API
 	modImplementation(fabricApi.module("fabric-resource-loader-v0", project.fabric_version))
 	modImplementation(fabricApi.module("fabric-lifecycle-events-v1", project.fabric_version))
 	modImplementation(fabricApi.module("fabric-key-binding-api-v1", project.fabric_version))
+	modImplementation(fabricApi.module("fabric-rendering-data-attachment-v1", project.fabric_version))
+	modImplementation(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_version))
+	// Sodium
+	modImplementation "maven.modrinth:sodium:mc1.20.2-0.5.3"
 }
 
 processResources {

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.*;
 import org.benefit.Variables;
 
 @Mixin(ClientConnection.class)
-public class ClientConnectionMixin {
+public abstract class ClientConnectionMixin {
     @Inject(at = @At("HEAD"), method = "sendImmediately", cancellable = true)
     public void sendImmediately(Packet<?> packet, PacketCallbacks callbacks, boolean flush, CallbackInfo ci) {
         // Cancel packets if send packets = false

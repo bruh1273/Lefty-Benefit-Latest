@@ -9,6 +9,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.text.Text;
+import org.benefit.LayoutPos;
 import org.benefit.Variables;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,13 +35,12 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
         assert mc.player != null;
 
         //create input text box
-        textBox = new TextFieldWidget(mc.textRenderer, 88, 250, 100, 20, Text.of("Command"));
+        textBox = new TextFieldWidget(mc.textRenderer, LayoutPos.xValue(100), LayoutPos.sendChatYPos(), 100, 20, Text.of("Send Chat"));
         textBox.setText(Variables.lastCommand);
         textBox.setMaxLength(65535);
-        textBox.setFocused(true);
 
         //render the send chat button
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Send chat"), button -> sendChat()).dimensions(5, 250, 80, 20).build());
+//        this.addDrawableChild(ButtonWidget.builder(Text.literal("Send chat"), button -> sendChat()).dimensions(5, 250, 80, 20).build());
 
         //render get name button
         this.addDrawableChild(ButtonWidget.builder(Text.of("Get Name"), button -> {
@@ -48,7 +48,7 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
             mc.player.sendMessage(Text.literal("Container Name: ").append(title));
             //automatically copy the title to clipboard when called
             mc.keyboard.setClipboard(title.getString());
-        }).dimensions(4, 220, 80, 20).build());
+        }).dimensions(LayoutPos.xValue(80), LayoutPos.getNameYPos(), 80, 20).build());
     }
 
     @Unique
@@ -75,6 +75,11 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
         super.render(context, mouseX, mouseY, delta);
         this.drawMouseoverTooltip(context, mouseX, mouseY);
         textBox.render(context, mouseX, mouseY, delta);
+        if(!textBox.isFocused() && textBox.getText().isBlank()) textBox.setSuggestion("Send Chat...");
+        if(textBox.isFocused()) textBox.setSuggestion("");
+//        if(!textBox.isFocused()) context.drawText(client.textRenderer, "Send Chat...",
+//                textBox.getX() + 10, textBox.getY() - (textBox.getHeight() + 9 / 2),
+//                0xFF7F7F7F, false);
     }
 
     /**
@@ -82,7 +87,8 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public boolean charTyped(char chr, int keyCode) {
-        return textBox.charTyped(chr, keyCode) || super.charTyped(chr, keyCode);
+        textBox.charTyped(chr, keyCode);
+        return super.charTyped(chr, keyCode);
     }
 
     /**
@@ -90,7 +96,8 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int m) {
-        return textBox.keyReleased(keyCode, scanCode, m) || super.keyReleased(keyCode, scanCode, m);
+        textBox.keyReleased(keyCode, scanCode, m);
+        return super.keyReleased(keyCode, scanCode, m);
     }
 
     /**
@@ -98,10 +105,9 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int m) {
-        if (textBox.isFocused() && keyCode == GLFW.GLFW_KEY_ENTER) {
-            sendChat();
-            return true;
-        } else return textBox.keyPressed(keyCode, scanCode, m) || super.keyPressed(keyCode, scanCode, m);
+        if (textBox.isFocused() && keyCode == GLFW.GLFW_KEY_ENTER) sendChat();
+        textBox.keyPressed(keyCode, scanCode, m);
+        return super.keyPressed(keyCode, scanCode, m);
     }
 
     /**
@@ -109,7 +115,10 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public boolean mouseClicked(double mX, double mY, int b) {
-        return textBox.mouseClicked(mX, mY, b) || super.mouseClicked(mX, mY, b);
+        textBox.onClick(mX, mY);
+        if(textBox.mouseClicked(mX, mY, b)) textBox.setFocused(true);
+        if(!textBox.mouseClicked(mX, mY, b)) textBox.setFocused(false);
+        return super.mouseClicked(mX, mY, b);
     }
 
     @Override

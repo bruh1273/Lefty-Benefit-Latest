@@ -1,3 +1,10 @@
 {
-  "benefit.key.restoreScreen": "Restore Screen"
+  "benefit.key.restoreScreen": "Restore Screen",
+  "benefit.format": "Benefit Layout",
+  "benefit.format.default": "Default",
+  "benefit.format.topright":  "Top Right",
+  "benefit.format.bottomleft":  "Bottom Left",
+  "benefit.format.bottomright":  "Bottom Right",
+  "benefit.format.disabled":  "Disabled",
+  "benefit.format.tooltip":  "Flip through this option to change the layout of Lefty's Benefit's GUI buttons."
 }

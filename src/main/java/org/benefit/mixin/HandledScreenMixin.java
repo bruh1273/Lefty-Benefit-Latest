@@ -10,6 +10,8 @@ import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.benefit.Client;
+import org.benefit.LayoutMode;
+import org.benefit.LayoutPos;
 import org.benefit.Variables;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +19,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static org.benefit.Client.mc;
 import static org.benefit.Client.restoreScreenBind;
@@ -43,21 +46,13 @@ public abstract class HandledScreenMixin extends Screen {
         String bGray = Formatting.BOLD.toString() + Formatting.GRAY;
         String bGreen = Formatting.BOLD.toString() + Formatting.GREEN;
 
-        //display sync id
-        Text syncId = Text.of("Sync Id: " + mc.player.currentScreenHandler.syncId);
-        addDrawableChild(new TextWidget(4, 5, textRenderer.getWidth(syncId) + 4, 20, syncId, textRenderer));
-
-        //display revision
-        Text revision = Text.of("Revision: " + mc.player.currentScreenHandler.getRevision());
-        addDrawableChild(new TextWidget(4, 20, textRenderer.getWidth(revision) + 4, 20, revision, textRenderer));
-
         //add in send packets button
         addDrawableChild(ButtonWidget.builder(Text.of("Send Packets: " + Variables.sendUIPackets), button -> {
             Variables.sendUIPackets = !Variables.sendUIPackets;
 
             //setting the text on the button to true or false when it is active
             button.setMessage(Text.of("Send Packets: " + Variables.sendUIPackets));
-        }).dimensions(4, 100, 120, 20).build());
+        }).dimensions(LayoutPos.xValue(120), LayoutPos.baseY() - 90, 120, 20).build());
 
         //add in delay packets button
         addDrawableChild(ButtonWidget.builder(Text.of("Delay packets: " + Variables.delayUIPackets), (button) -> {
@@ -77,16 +72,17 @@ public abstract class HandledScreenMixin extends Screen {
                 mc.player.sendMessage(Text.of(bGray + "Successfully sent " + bGreen + DelayedPacketsCount + Formatting.GRAY + " delayed packets."));
                 Variables.delayedPackets.clear();
             }
-        }).width(120).position(4, 70).build());
+        }).width(120).position(LayoutPos.xValue(120), LayoutPos.baseY() - 120).build());
 
         //add in softclose button
-        addDrawableChild(ButtonWidget.builder(Text.of("Soft Close"), (button) -> mc.setScreen(null)).width(80).position(4, 40).build());
+        addDrawableChild(ButtonWidget.builder(Text.of("Soft Close"), (button) -> mc.setScreen(null))
+                .width(80).position(LayoutPos.xValue(80), LayoutPos.baseY() - 150).build());
 
         //add in desync button
         addDrawableChild(ButtonWidget.builder(Text.of("De-sync"), (button) -> {
             int syncID = mc.player.currentScreenHandler.syncId;
             mc.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(syncID));
-        }).width(80).position(4, 190).build());
+        }).width(80).position(LayoutPos.xValue(80), LayoutPos.baseY()).build());
 
         //add in save ui button
         addDrawableChild(ButtonWidget.builder(Text.of("Save UI"), (button) -> {
@@ -95,7 +91,7 @@ public abstract class HandledScreenMixin extends Screen {
             Variables.storedScreenHandler = mc.player.currentScreenHandler;
             mc.setScreen(null);
             mc.player.sendMessage(Text.literal("Screen §asuccessfully §rsaved! Press §a" + restoreScreenBind.getString() + " §rto restore it!"));
-        }).width(80).position(4, 130).build());
+        }).width(80).position(LayoutPos.xValue(80), LayoutPos.baseY() - 60).build());
 
         //add in leave n send packets button
         addDrawableChild(ButtonWidget.builder(Text.of("Leave & send packets"), (button) -> {
@@ -110,38 +106,33 @@ public abstract class HandledScreenMixin extends Screen {
                 int DelayedPacketsAmount = Variables.delayedPackets.size();
 
                 //disconnect player
-                mc.getNetworkHandler().getConnection().disconnect(Text.of(bGray + "Disconnected, " + bGreen + DelayedPacketsAmount + bGray + " packets successfully sent."));
+                mc.getNetworkHandler().getConnection().disconnect(
+                        Text.of(bGray + "Disconnected, " + bGreen + DelayedPacketsAmount + bGray + " packets successfully sent."));
                 Variables.delayedPackets.clear();
             }
-        }).width(140).position(4, 160).build());
+        }).width(140).position(LayoutPos.xValue(140), LayoutPos.baseY() - 30).build());
     }
 
     @Inject(at = @At("RETURN"), method = "render")
     public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         // Add in slot overlay
-        Client.addText(context, client.textRenderer, client, this.x, this.y);
+        if(Client.config.getLayoutMode() != LayoutMode.NONE) Client.addText(context, client.textRenderer, client, this.x, this.y);
+
+        // Add in Sync ID and Revision on screen.
+        Client.renderTexts(context, client.textRenderer, client);
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         // Release any alt key and the color of the slot overlay will go away.
         final int clr = 0xFF828282;
-        if(
-                keyCode == GLFW.GLFW_KEY_LEFT_ALT
-                        || keyCode == GLFW.GLFW_KEY_RIGHT_ALT
-                        && Client.txtColor != clr
-        ) Client.txtColor = clr;
+        if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Client.txtColor != clr)
+            Client.txtColor = clr;
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // If you're holding any alt key it will change slot overlay to white.
-        if(
-                keyCode == GLFW.GLFW_KEY_LEFT_ALT
-                        || keyCode == GLFW.GLFW_KEY_RIGHT_ALT
-                        && Client.txtColor != -1
-        ) Client.txtColor = -1;
-        return super.keyPressed(keyCode, scanCode, modifiers);
+    @Inject(at = @At("HEAD"), method = "keyPressed")
+    public void keyPres(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+        if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Client.txtColor != -1)
+            Client.txtColor = -1;
     }
 }
