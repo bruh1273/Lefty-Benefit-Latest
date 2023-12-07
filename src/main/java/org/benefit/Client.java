@@ -98,7 +98,7 @@ public class Client implements ClientModInitializer {
         }
     }
 
-    private static final SimpleOption<LayoutMode> format = new SimpleOption<>("benefit.format", SimpleOption.constantTooltip(Text.translatable("benefit.format.tooltip")), (optionText, value) ->
+    public static final SimpleOption<LayoutMode> format = new SimpleOption<>("benefit.format", SimpleOption.constantTooltip(Text.translatable("benefit.format.tooltip")), (optionText, value) ->
             Text.translatable(value.getTranslationKey()),
             new SimpleOption.AlternateValuesSupportingCyclingCallbacks<>(
                     Arrays.asList(LayoutMode.values()),
@@ -109,11 +109,12 @@ public class Client implements ClientModInitializer {
             config.getLayoutMode(), value -> {
                 config.setLayout(value);
                 config.save();
-            });
+    });
 
-    public static SimpleOption<LayoutMode> getFormat() {
-        return format;
-    }
+    public static final SimpleOption<Boolean> overlay = SimpleOption.ofBoolean("benefit.overlay", SimpleOption.constantTooltip(Text.translatable("benefit.overlay.tooltip")), config.getOverlayValue(), value -> {
+        config.setOverlayValue(value);
+        config.save();
+    });
 
 
 }

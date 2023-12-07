@@ -77,9 +77,6 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
         textBox.render(context, mouseX, mouseY, delta);
         if(!textBox.isFocused() && textBox.getText().isBlank()) textBox.setSuggestion("Send Chat...");
         if(textBox.isFocused()) textBox.setSuggestion("");
-//        if(!textBox.isFocused()) context.drawText(client.textRenderer, "Send Chat...",
-//                textBox.getX() + 10, textBox.getY() - (textBox.getHeight() + 9 / 2),
-//                0xFF7F7F7F, false);
     }
 
     /**
@@ -87,8 +84,7 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public boolean charTyped(char chr, int keyCode) {
-        textBox.charTyped(chr, keyCode);
-        return super.charTyped(chr, keyCode);
+        return textBox.charTyped(chr, keyCode) || super.charTyped(chr, keyCode);
     }
 
     /**
@@ -96,8 +92,7 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int m) {
-        textBox.keyReleased(keyCode, scanCode, m);
-        return super.keyReleased(keyCode, scanCode, m);
+        return textBox.keyReleased(keyCode, scanCode, m) || super.keyReleased(keyCode, scanCode, m);
     }
 
     /**
@@ -105,9 +100,11 @@ public abstract class ContainerScreenMixin extends HandledScreen<GenericContaine
      */
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int m) {
-        if (textBox.isFocused() && keyCode == GLFW.GLFW_KEY_ENTER) sendChat();
-        textBox.keyPressed(keyCode, scanCode, m);
-        return super.keyPressed(keyCode, scanCode, m);
+        if (textBox.isFocused()) {
+            if(keyCode == GLFW.GLFW_KEY_ENTER) sendChat();
+            if(this.client.options.inventoryKey.matchesKey(keyCode, scanCode)) return false;
+        }
+        return textBox.keyPressed(keyCode, scanCode, m) || super.keyPressed(keyCode, scanCode, m);
     }
 
     /**

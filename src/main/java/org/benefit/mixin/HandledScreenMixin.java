@@ -116,7 +116,7 @@ public abstract class HandledScreenMixin extends Screen {
     @Inject(at = @At("RETURN"), method = "render")
     public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         // Add in slot overlay
-        if(Client.config.getLayoutMode() != LayoutMode.NONE) Client.addText(context, client.textRenderer, client, this.x, this.y);
+        if(Client.config.getLayoutMode() != LayoutMode.NONE && Client.config.getOverlayValue()) Client.addText(context, client.textRenderer, client, this.x, this.y);
 
         // Add in Sync ID and Revision on screen.
         Client.renderTexts(context, client.textRenderer, client);

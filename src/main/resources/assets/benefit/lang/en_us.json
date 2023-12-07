@@ -6,5 +6,7 @@
   "benefit.format.bottomleft":  "Bottom Left",
   "benefit.format.bottomright":  "Bottom Right",
   "benefit.format.disabled":  "Disabled",
-  "benefit.format.tooltip":  "Flip through this option to change the layout of Lefty's Benefit's GUI buttons."
+  "benefit.format.tooltip":  "Flip through this option to change the layout of Lefty's Benefit's GUI buttons.",
+  "benefit.overlay": "Slot Overlay",
+  "benefit.overlay.tooltip": "Disabling this option will remove the slot overlay from your screen. Enabling it again will bring the overlay back."
 }

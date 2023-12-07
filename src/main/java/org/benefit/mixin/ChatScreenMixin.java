@@ -22,7 +22,7 @@ public abstract class ChatScreenMixin extends Screen {
     void drawChars(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         int length = this.chatField.getText().length();
         // Display the amount of chars in the chat box.
-        context.drawText(client.textRenderer, ""+length, 4,
+        context.drawText(client.textRenderer, Integer.toString(length), 4,
                 client.getWindow().getScaledHeight() - 36,
                 length > 256 ? 0xFFC38C8C : 0xFF7F7F7F, false);
     }

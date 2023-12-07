@@ -24,7 +24,7 @@ dependencies {
 	modImplementation(fabricApi.module("fabric-rendering-data-attachment-v1", project.fabric_version))
 	modImplementation(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_version))
 	// Sodium
-	modImplementation "maven.modrinth:sodium:mc1.20.2-0.5.3"
+	modImplementation "maven.modrinth:sodium:mc1.20.3-0.5.4"
 }
 
 processResources {
