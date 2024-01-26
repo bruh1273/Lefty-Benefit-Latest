@@ -1,9 +1,10 @@
-package org.benefit.mixin;
+package org.benefit.mixin.screen;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -14,10 +15,13 @@ import org.benefit.Variables;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Objects;
 
 import static org.benefit.Client.mc;
 import static org.benefit.Client.restoreScreenBind;
@@ -28,6 +32,7 @@ public abstract class HandledScreenMixin extends Screen {
     @Shadow protected int x;
 
     @Shadow protected int y;
+    @Unique private TextFieldWidget textBox;
 
     protected HandledScreenMixin(Text title) {
         super(title);
@@ -54,7 +59,7 @@ public abstract class HandledScreenMixin extends Screen {
             //condition to see if any delayed packets was delayed, then send them
             if (!Variables.delayUIPackets && !Variables.delayedPackets.isEmpty()) {
                 for (Packet<?> packet : Variables.delayedPackets)
-                    mc.getNetworkHandler().sendPacket(packet);
+                    Objects.requireNonNull(mc.getNetworkHandler()).sendPacket(packet);
 
 
                 //add in message to say how many delayed packets were sent
@@ -67,12 +72,6 @@ public abstract class HandledScreenMixin extends Screen {
         //add in softclose button
         addDrawableChild(ButtonWidget.builder(Text.of("Soft Close"), (button) -> mc.setScreen(null))
                 .width(80).position(LayoutPos.xValue(80), LayoutPos.baseY() - 150).build());
-
-//        //add in desync button
-//        addDrawableChild(ButtonWidget.builder(Text.of("De-sync"), (button) -> {
-//            int syncID = mc.player.currentScreenHandler.syncId;
-//            mc.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(syncID));
-//        }).width(80).position(LayoutPos.xValue(80), LayoutPos.baseY()).build());
 
         //add in save ui button
         addDrawableChild(ButtonWidget.builder(Text.of("Save UI"), (button) -> {
@@ -90,26 +89,48 @@ public abstract class HandledScreenMixin extends Screen {
                 Variables.delayUIPackets = false;
 
                 for (Packet<?> packet : Variables.delayedPackets) {
-                    mc.getNetworkHandler().sendPacket(packet);
+                    Objects.requireNonNull(mc.getNetworkHandler()).sendPacket(packet);
                 }
                 //add in message to say how many delayed packets were sent
                 int DelayedPacketsAmount = Variables.delayedPackets.size();
 
                 //disconnect player
-                mc.getNetworkHandler().getConnection().disconnect(
+                Objects.requireNonNull(mc.getNetworkHandler()).getConnection().disconnect(
                         Text.of(bGray + "Disconnected, " + bGreen + DelayedPacketsAmount + bGray + " packets successfully sent."));
                 Variables.delayedPackets.clear();
             }
         }).width(140).position(LayoutPos.xValue(140), LayoutPos.baseY() - 60).build());
+
+        //create input text box
+        textBox = new TextFieldWidget(mc.textRenderer, LayoutPos.xValue(100), LayoutPos.sendChatYPos(), 100, 20, Text.of("Send Chat"));
+        textBox.setText(Variables.lastCommand);
+        textBox.setMaxLength(65535);
+
+        //render get name button
+        if(inContainer()) this.addDrawableChild(ButtonWidget.builder(Text.of("Get Name"), button -> {
+            //dispatch container's name to player in chat
+            mc.player.sendMessage(Text.literal("Container Name: ").append(title));
+            //automatically copy the title to clipboard when called
+            mc.keyboard.setClipboard(title.getString());
+        }).dimensions(LayoutPos.xValue(80), LayoutPos.getNameYPos(), 80, 20).build());
     }
 
     @Inject(at = @At("RETURN"), method = "render")
     public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        assert client != null;
+
         // Add in slot overlay
-        if(Client.config.getLayoutMode() != LayoutMode.NONE && Client.config.getOverlayValue()) Client.addText(context, client.textRenderer, client, this.x, this.y);
+        if(Client.config.getLayoutMode() != LayoutMode.NONE && Client.config.getOverlayValue()) {
+            Client.addText(context, client.textRenderer, client, this.x, this.y);
+        }
 
         // Add in Sync ID and Revision on screen.
         Client.renderTexts(context, client.textRenderer, client);
+
+
+        if(inContainer()) textBox.render(context, mouseX, mouseY, delta);
+        if(!textBox.isFocused() && textBox.getText().isBlank()) textBox.setSuggestion("Send Chat...");
+        if(textBox.isFocused()) textBox.setSuggestion("");
     }
 
     @Override
@@ -120,9 +141,54 @@ public abstract class HandledScreenMixin extends Screen {
             Client.txtColor = clr;
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
-    @Inject(at = @At("HEAD"), method = "keyPressed")
-    public void keyPres(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
-        if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Client.txtColor != -1)
+
+    @Override
+    public boolean charTyped(char chr, int keyCode) {
+        return textBox.charTyped(chr, keyCode) || super.charTyped(chr, keyCode);
+    }
+
+    @Inject(at = @At("HEAD"), method = "keyPressed", cancellable = true)
+    public void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+        assert client != null;
+
+        if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Client.txtColor != -1) {
             Client.txtColor = -1;
+        }
+
+        if (textBox.isFocused()) {
+            if(keyCode == GLFW.GLFW_KEY_ENTER) sendChat();
+            if(client.options.inventoryKey.matchesKey(keyCode, scanCode)) cir.setReturnValue(false);
+            textBox.keyPressed(keyCode, scanCode, modifiers);
+        }
+    }
+
+    @Inject(at = @At("HEAD"), method = "mouseClicked")
+    public void mouseClick(double mX, double mY, int b, CallbackInfoReturnable<Boolean> cir) {
+        textBox.onClick(mX, mY);
+        if(textBox.mouseClicked(mX, mY, b)) textBox.setFocused(true);
+        if(!textBox.mouseClicked(mX, mY, b)) textBox.setFocused(false);
+    }
+
+    @Unique
+    private void sendChat() {
+        //we're assuming that MinecraftClient.getInstance().player is never going to be null when this code is ran.
+        assert mc.player != null;
+
+        //send message
+        String s = textBox.getText();
+        if (s.startsWith("/")) mc.player.networkHandler.sendChatCommand(s.substring(1));
+        else mc.player.networkHandler.sendChatMessage(s);
+
+        //reset state
+        textBox.setText("");
+        Variables.lastCommand = "";
+    }
+
+    @Unique
+    private boolean inContainer() {
+        return mc.currentScreen instanceof Generic3x3ContainerScreen
+                || mc.currentScreen instanceof GenericContainerScreen
+                || mc.currentScreen instanceof ShulkerBoxScreen
+                || mc.currentScreen instanceof HopperScreen;
     }
 }

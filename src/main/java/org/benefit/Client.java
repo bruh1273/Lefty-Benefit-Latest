@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.option.SimpleOption;
 import net.minecraft.client.util.InputUtil;
@@ -18,8 +17,6 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.benefit.LayoutMode.*;
 
 public class Client implements ClientModInitializer {
     public static final MinecraftClient mc = MinecraftClient.getInstance();
@@ -56,6 +53,8 @@ public class Client implements ClientModInitializer {
     }
 
     public static void addText(DrawContext context, TextRenderer textRenderer, MinecraftClient client, int x, int y) {
+        assert client.player != null;
+
         for(Slot slot : client.player.currentScreenHandler.slots) {
             Text id = Text.literal(""+slot.id);
             context.drawText(
@@ -70,6 +69,8 @@ public class Client implements ClientModInitializer {
     }
 
     public static void renderTexts(DrawContext context, TextRenderer textRenderer, MinecraftClient client) {
+        assert mc.player != null;
+
         Text syncId = Text.of("Sync Id: " + mc.player.currentScreenHandler.syncId);
         Text revision = Text.of("Revision: " + mc.player.currentScreenHandler.getRevision());
         int xss = client.getWindow().getScaledWidth() - textRenderer.getWidth(syncId) - 4;

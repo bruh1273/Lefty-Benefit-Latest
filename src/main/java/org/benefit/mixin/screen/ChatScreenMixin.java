@@ -1,4 +1,4 @@
-package org.benefit.mixin;
+package org.benefit.mixin.screen;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -20,6 +20,8 @@ public abstract class ChatScreenMixin extends Screen {
 
     @Inject(at = @At("TAIL"), method = "render")
     void drawChars(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        assert client != null;
+
         int length = this.chatField.getText().length();
         // Display the amount of chars in the chat box.
         context.drawText(client.textRenderer, Integer.toString(length), 4,

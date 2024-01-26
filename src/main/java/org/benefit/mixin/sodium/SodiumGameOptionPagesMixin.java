@@ -22,7 +22,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Mixin(value = SodiumGameOptionPages.class, remap = false)
 public abstract class SodiumGameOptionPagesMixin {
     @Shadow @Final private static MinecraftOptionsStorage vanillaOpts;
@@ -32,18 +31,14 @@ public abstract class SodiumGameOptionPagesMixin {
         List<Option<?>> options = new ArrayList<>(cir.getReturnValue().getOptions());
         options.add(2, OptionImpl.createBuilder(LayoutMode.class, vanillaOpts)
                 .setName(Text.translatable("benefit.format"))
-                .setControl(ctrl -> {
-                    return new CyclingControl<>(ctrl, LayoutMode.class, new Text[] {
-                            Text.translatable("benefit.format.default"),
-                            Text.translatable("benefit.format.topright"),
-                            Text.translatable("benefit.format.bottomleft"),
-                            Text.translatable("benefit.format.bottomright"),
-                            Text.translatable("benefit.format.disabled")
-                    });
-                }).setTooltip(Text.translatable("benefit.format.tooltip"))
-                .setBinding((opt, val) -> Client.format.setValue(val), opt -> {
-                    return Client.format.getValue();
-                }).build());
+                .setControl(ctrl -> new CyclingControl<>(ctrl, LayoutMode.class, new Text[] {
+                        Text.translatable("benefit.format.default"),
+                        Text.translatable("benefit.format.topright"),
+                        Text.translatable("benefit.format.bottomleft"),
+                        Text.translatable("benefit.format.bottomright"),
+                        Text.translatable("benefit.format.disabled")
+                })).setTooltip(Text.translatable("benefit.format.tooltip"))
+                .setBinding((opt, val) -> Client.format.setValue(val), opt -> Client.format.getValue()).build());
         options.add(2, OptionImpl.createBuilder(Boolean.TYPE, vanillaOpts)
                 .setName(Text.translatable("benefit.overlay")).setTooltip(Text.translatable("benefit.overlay.tooltip"))
                 .setBinding((option, value) -> Client.overlay.setValue(value), option -> Client.overlay.getValue())

@@ -4,14 +4,12 @@
   "package": "org.benefit.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "BookScreenMixin",
-    "ChatScreenMixin",
     "ClientConnectionMixin",
-    "ContainerScreenMixin",
-    "HandledScreenMixin",
-    "ShulkerBoxScreenMixin",
     "SplashTextResourceSupplierMixin",
-    "VideoOptionsScreenMixin"
+    "screen.BookScreenMixin",
+    "screen.ChatScreenMixin",
+    "screen.HandledScreenMixin",
+    "screen.VideoOptionsScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

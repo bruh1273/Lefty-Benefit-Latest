@@ -1,4 +1,4 @@
-package org.benefit.mixin;
+package org.benefit.mixin.screen;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -14,6 +14,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Objects;
 
 import static org.benefit.Client.mc;
 import static org.benefit.Client.restoreScreenBind;
@@ -44,7 +46,7 @@ public abstract class BookScreenMixin extends Screen {
 
             //condition to see if any delayed packets was delayed, then send them
             if (!Variables.delayUIPackets && !Variables.delayedPackets.isEmpty()) {
-                for (Packet<?> packet : Variables.delayedPackets) mc.getNetworkHandler().sendPacket(packet);
+                for (Packet<?> packet : Variables.delayedPackets) Objects.requireNonNull(mc.getNetworkHandler()).sendPacket(packet);
                 //add in message to say how many delayed packets were sent
                 int DelayedPacketsCount = Variables.delayedPackets.size();
                 mc.player.sendMessage(Text.of(bGray + "Successfully sent " + bGreen + DelayedPacketsCount + Formatting.GRAY + " delayed packets."));
@@ -72,13 +74,13 @@ public abstract class BookScreenMixin extends Screen {
                 Variables.delayUIPackets = false;
 
                 for (Packet<?> packet : Variables.delayedPackets) {
-                    mc.getNetworkHandler().sendPacket(packet);
+                    Objects.requireNonNull(mc.getNetworkHandler()).sendPacket(packet);
                 }
                 //add in message to say how many delayed packets were sent
                 int DelayedPacketsAmount = Variables.delayedPackets.size();
 
                 //disconnect player
-                mc.getNetworkHandler().getConnection().disconnect(Text.of(bGray + "Disconnected, " + bGreen + DelayedPacketsAmount + bGray + " packets successfully sent."));
+                Objects.requireNonNull(mc.getNetworkHandler()).getConnection().disconnect(Text.of(bGray + "Disconnected, " + bGreen + DelayedPacketsAmount + bGray + " packets successfully sent."));
                 Variables.delayedPackets.clear();
             }
         }).width(140).position(LayoutPos.xValue(140), LayoutPos.baseY() - 30).build());
@@ -86,6 +88,8 @@ public abstract class BookScreenMixin extends Screen {
 
     @Inject(at = @At("RETURN"), method = "render")
     public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        assert client != null;
+
         // Add in Sync ID and Revision on screen.
         Client.renderTexts(context, client.textRenderer, client);
     }
