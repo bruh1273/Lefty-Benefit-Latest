@@ -27,10 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Mixin(SodiumGameOptionPages.class)
+@Mixin(value = SodiumGameOptionPages.class, remap = false)
 public abstract class SodiumGameOptionPagesMixin {
     @Shadow @Final private static MinecraftOptionsStorage vanillaOpts;
-    @Inject(at = @At("TAIL"), method = "advanced", remap = false, cancellable = true)
+    @Inject(at = @At("TAIL"), method = "advanced", cancellable = true)
     private static void addBenefitLayout(CallbackInfoReturnable<OptionPage> cir) {
         List<OptionGroup> groups = new ArrayList<>(cir.getReturnValue().getGroups());
         List<Option<?>> options = new ArrayList<>(cir.getReturnValue().getOptions());
