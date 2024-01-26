@@ -4,9 +4,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.benefit.Client;
@@ -46,14 +44,6 @@ public abstract class HandledScreenMixin extends Screen {
         String bGray = Formatting.BOLD.toString() + Formatting.GRAY;
         String bGreen = Formatting.BOLD.toString() + Formatting.GREEN;
 
-        //add in send packets button
-        addDrawableChild(ButtonWidget.builder(Text.of("Send Packets: " + Variables.sendUIPackets), button -> {
-            Variables.sendUIPackets = !Variables.sendUIPackets;
-
-            //setting the text on the button to true or false when it is active
-            button.setMessage(Text.of("Send Packets: " + Variables.sendUIPackets));
-        }).dimensions(LayoutPos.xValue(120), LayoutPos.baseY() - 90, 120, 20).build());
-
         //add in delay packets button
         addDrawableChild(ButtonWidget.builder(Text.of("Delay packets: " + Variables.delayUIPackets), (button) -> {
             Variables.delayUIPackets = !Variables.delayUIPackets;
@@ -78,11 +68,11 @@ public abstract class HandledScreenMixin extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.of("Soft Close"), (button) -> mc.setScreen(null))
                 .width(80).position(LayoutPos.xValue(80), LayoutPos.baseY() - 150).build());
 
-        //add in desync button
-        addDrawableChild(ButtonWidget.builder(Text.of("De-sync"), (button) -> {
-            int syncID = mc.player.currentScreenHandler.syncId;
-            mc.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(syncID));
-        }).width(80).position(LayoutPos.xValue(80), LayoutPos.baseY()).build());
+//        //add in desync button
+//        addDrawableChild(ButtonWidget.builder(Text.of("De-sync"), (button) -> {
+//            int syncID = mc.player.currentScreenHandler.syncId;
+//            mc.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(syncID));
+//        }).width(80).position(LayoutPos.xValue(80), LayoutPos.baseY()).build());
 
         //add in save ui button
         addDrawableChild(ButtonWidget.builder(Text.of("Save UI"), (button) -> {
@@ -91,7 +81,7 @@ public abstract class HandledScreenMixin extends Screen {
             Variables.storedScreenHandler = mc.player.currentScreenHandler;
             mc.setScreen(null);
             mc.player.sendMessage(Text.literal("Screen §asuccessfully §rsaved! Press §a" + restoreScreenBind.getString() + " §rto restore it!"));
-        }).width(80).position(LayoutPos.xValue(80), LayoutPos.baseY() - 60).build());
+        }).width(80).position(LayoutPos.xValue(80), LayoutPos.baseY() - 90).build());
 
         //add in leave n send packets button
         addDrawableChild(ButtonWidget.builder(Text.of("Leave & send packets"), (button) -> {
@@ -110,7 +100,7 @@ public abstract class HandledScreenMixin extends Screen {
                         Text.of(bGray + "Disconnected, " + bGreen + DelayedPacketsAmount + bGray + " packets successfully sent."));
                 Variables.delayedPackets.clear();
             }
-        }).width(140).position(LayoutPos.xValue(140), LayoutPos.baseY() - 30).build());
+        }).width(140).position(LayoutPos.xValue(140), LayoutPos.baseY() - 60).build());
     }
 
     @Inject(at = @At("RETURN"), method = "render")

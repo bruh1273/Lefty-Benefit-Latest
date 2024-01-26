@@ -9,6 +9,7 @@
     "ClientConnectionMixin",
     "ContainerScreenMixin",
     "HandledScreenMixin",
+    "ShulkerBoxScreenMixin",
     "SplashTextResourceSupplierMixin",
     "VideoOptionsScreenMixin"
   ],

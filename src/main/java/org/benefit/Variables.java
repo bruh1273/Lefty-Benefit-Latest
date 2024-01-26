@@ -9,7 +9,6 @@ import java.util.ArrayList;
  * Variables used across the mod
  */
 public class Variables {
-    public static boolean sendUIPackets = true;
     public static boolean delayUIPackets = false;
     public static boolean shouldEditSign = true;
     public static final ArrayList<Packet<?>> delayedPackets = new ArrayList<>();

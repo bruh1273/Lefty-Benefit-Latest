@@ -13,14 +13,8 @@ import org.benefit.Variables;
 public abstract class ClientConnectionMixin {
     @Inject(at = @At("HEAD"), method = "sendImmediately", cancellable = true)
     public void sendImmediately(Packet<?> packet, PacketCallbacks callbacks, boolean flush, CallbackInfo ci) {
-        // Cancel packets if send packets = false
-        if (!Variables.sendUIPackets && (packet instanceof ClickSlotC2SPacket || packet instanceof ButtonClickC2SPacket)) {
-            ci.cancel();
-            return;
-        }
-
         // The method to store the delayed packets
-        if (Variables.delayUIPackets && (packet instanceof ClickSlotC2SPacket || packet instanceof ButtonClickC2SPacket)) {
+        if (Variables.delayUIPackets && (packet instanceof ClickSlotC2SPacket || packet instanceof ButtonClickC2SPacket || packet instanceof CloseHandledScreenC2SPacket)) {
             Variables.delayedPackets.add(packet);
             ci.cancel();
         }

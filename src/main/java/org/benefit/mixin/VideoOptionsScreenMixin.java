@@ -17,6 +17,7 @@ public abstract class VideoOptionsScreenMixin {
     private static void getOptions(GameOptions gameOptions, CallbackInfoReturnable<SimpleOption<?>[]> cir) {
         SimpleOption<?>[] values = cir.getReturnValue();
         cir.setReturnValue(ArrayUtils.insert(9, values, Client.format));
+        cir.setReturnValue(ArrayUtils.insert(10, values, Client.overlay));
     }
 
 }

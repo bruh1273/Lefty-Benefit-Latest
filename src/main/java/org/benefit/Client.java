@@ -76,8 +76,8 @@ public class Client implements ClientModInitializer {
         int xrr = client.getWindow().getScaledWidth() - textRenderer.getWidth(revision) - 4;
         int xs = (client.getWindow().getScaledWidth() - 82) - (textRenderer.getWidth(syncId) + 4);
         int xr = (client.getWindow().getScaledWidth() - 82) - (textRenderer.getWidth(revision) + 4);
-        int ys = LayoutPos.baseY() + 1;
-        int yr = LayoutPos.baseY() + 11;
+        int ys = LayoutPos.baseY() - 79;
+        int yr = LayoutPos.baseY() - 89;
         switch(config.getLayoutMode()) {
             case TOP_LEFT -> {
                 context.drawText(textRenderer, syncId, 4, 5, -1, false);
