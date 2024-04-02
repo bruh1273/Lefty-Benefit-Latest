@@ -10,7 +10,7 @@ import me.jellysquid.mods.sodium.client.gui.options.control.CyclingControl;
 import me.jellysquid.mods.sodium.client.gui.options.control.TickBoxControl;
 import me.jellysquid.mods.sodium.client.gui.options.storage.MinecraftOptionsStorage;
 import net.minecraft.text.Text;
-import org.benefit.Client;
+import org.benefit.Benefit;
 import org.benefit.LayoutMode;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,10 +38,10 @@ public abstract class SodiumGameOptionPagesMixin {
                         Text.translatable("benefit.format.bottomright"),
                         Text.translatable("benefit.format.disabled")
                 })).setTooltip(Text.translatable("benefit.format.tooltip"))
-                .setBinding((opt, val) -> Client.format.setValue(val), opt -> Client.format.getValue()).build());
+                .setBinding((opt, val) -> Benefit.format.setValue(val), opt -> Benefit.format.getValue()).build());
         options.add(2, OptionImpl.createBuilder(Boolean.TYPE, vanillaOpts)
                 .setName(Text.translatable("benefit.overlay")).setTooltip(Text.translatable("benefit.overlay.tooltip"))
-                .setBinding((option, value) -> Client.overlay.setValue(value), option -> Client.overlay.getValue())
+                .setBinding((option, value) -> Benefit.overlay.setValue(value), option -> Benefit.overlay.getValue())
                 .setControl(TickBoxControl::new).build());
         OptionGroup.Builder builder = OptionGroup.createBuilder();
         options.forEach(builder::add);

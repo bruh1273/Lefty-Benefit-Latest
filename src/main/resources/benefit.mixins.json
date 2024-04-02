@@ -6,6 +6,7 @@
   "client": [
     "ClientConnectionMixin",
     "SplashTextResourceSupplierMixin",
+    "screen.AbstractSignEditScreenMixin",
     "screen.BookScreenMixin",
     "screen.ChatScreenMixin",
     "screen.HandledScreenMixin",

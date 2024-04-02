@@ -17,7 +17,7 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "org.benefit.Client"
+      "org.benefit.Benefit"
     ]
   },
   "mixins": [

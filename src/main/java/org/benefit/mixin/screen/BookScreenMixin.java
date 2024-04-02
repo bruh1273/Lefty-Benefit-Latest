@@ -7,7 +7,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.benefit.Client;
+import org.benefit.Benefit;
 import org.benefit.LayoutPos;
 import org.benefit.Variables;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Objects;
 
-import static org.benefit.Client.mc;
-import static org.benefit.Client.restoreScreenBind;
+import static org.benefit.Benefit.mc;
+import static org.benefit.Benefit.restoreScreenBind;
 
 
 @Mixin(BookScreen.class)
@@ -91,6 +91,6 @@ public abstract class BookScreenMixin extends Screen {
         assert client != null;
 
         // Add in Sync ID and Revision on screen.
-        Client.renderTexts(context, client.textRenderer, client);
+        Benefit.renderTexts(context, client.textRenderer, client);
     }
 }

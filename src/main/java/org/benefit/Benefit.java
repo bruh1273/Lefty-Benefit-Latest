@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Client implements ClientModInitializer {
+public class Benefit implements ClientModInitializer {
     public static final MinecraftClient mc = MinecraftClient.getInstance();
     public static final Config config = new Config();
     public static Text restoreScreenBind;
@@ -53,10 +53,10 @@ public class Client implements ClientModInitializer {
     }
 
     public static void addText(DrawContext context, TextRenderer textRenderer, MinecraftClient client, int x, int y) {
-        assert client.player != null;
-
-        for(Slot slot : client.player.currentScreenHandler.slots) {
-            Text id = Text.literal(""+slot.id);
+        if(client.player == null) return;
+        for (int i = 0; i < client.player.currentScreenHandler.slots.size(); i++) {
+            final Slot slot = client.player.currentScreenHandler.slots.get(i);
+            final Text id = Text.literal(Integer.toString(slot.id));
             context.drawText(
                     textRenderer,
                     id,
@@ -69,34 +69,31 @@ public class Client implements ClientModInitializer {
     }
 
     public static void renderTexts(DrawContext context, TextRenderer textRenderer, MinecraftClient client) {
-        assert mc.player != null;
+        if(client.player == null) return;
+        final Text syncId = Text.of("Sync Id: " + client.player.currentScreenHandler.syncId);
+        final Text revision = Text.of("Revision: " + client.player.currentScreenHandler.getRevision());
+        context.drawText(textRenderer, syncId, x(client, textRenderer, syncId), y(true), -1, false);
+        context.drawText(textRenderer, revision, x(client, textRenderer, syncId), y(false), -1, false);
+    }
 
-        Text syncId = Text.of("Sync Id: " + mc.player.currentScreenHandler.syncId);
-        Text revision = Text.of("Revision: " + mc.player.currentScreenHandler.getRevision());
-        int xss = client.getWindow().getScaledWidth() - textRenderer.getWidth(syncId) - 4;
-        int xrr = client.getWindow().getScaledWidth() - textRenderer.getWidth(revision) - 4;
-        int xs = (client.getWindow().getScaledWidth() - 82) - (textRenderer.getWidth(syncId) + 4);
-        int xr = (client.getWindow().getScaledWidth() - 82) - (textRenderer.getWidth(revision) + 4);
-        int ys = LayoutPos.baseY() - 79;
-        int yr = LayoutPos.baseY() - 89;
-        switch(config.getLayoutMode()) {
-            case TOP_LEFT -> {
-                context.drawText(textRenderer, syncId, 4, 5, -1, false);
-                context.drawText(textRenderer, revision, 4, 20, -1, false);
-            }
-            case TOP_RIGHT -> {
-                context.drawText(textRenderer, syncId, xss, 5, -1, false);
-                context.drawText(textRenderer, revision, xrr, 20, -1, false);
-            }
-            case BOTTOM_LEFT -> {
-                context.drawText(textRenderer, syncId, 88, ys, -1, false);
-                context.drawText(textRenderer, revision, 88, yr, -1, false);
-            }
-            case BOTTOM_RIGHT -> {
-                context.drawText(textRenderer, syncId, xs, ys, -1, false);
-                context.drawText(textRenderer, revision, xr, yr, -1, false);
-            }
-        }
+    private static int x(MinecraftClient client, TextRenderer renderer, Text text) {
+        final int topRight = client.getWindow().getScaledWidth() - renderer.getWidth(text) - 4;
+        final int bottomRight = (client.getWindow().getScaledWidth() - 82) - (renderer.getWidth(text) + 4);
+        return switch(config.getLayoutMode()) {
+            case TOP_LEFT -> 4;
+            case TOP_RIGHT -> topRight;
+            case BOTTOM_LEFT -> 88;
+            case BOTTOM_RIGHT -> bottomRight;
+            case NONE -> 9999;
+        };
+    }
+
+    private static int y(boolean syncId) {
+        return switch(config.getLayoutMode()) {
+            case TOP_LEFT, TOP_RIGHT -> syncId ? 5 : 20;
+            case BOTTOM_LEFT, BOTTOM_RIGHT -> LayoutPos.baseY() - (syncId ? 79 : 89);
+            case NONE -> 9999;
+        };
     }
 
     public static final SimpleOption<LayoutMode> format = new SimpleOption<>("benefit.format", SimpleOption.constantTooltip(Text.translatable("benefit.format.tooltip")), (optionText, value) ->

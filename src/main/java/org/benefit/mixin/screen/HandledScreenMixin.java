@@ -8,7 +8,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.benefit.Client;
+import org.benefit.Benefit;
 import org.benefit.LayoutMode;
 import org.benefit.LayoutPos;
 import org.benefit.Variables;
@@ -23,8 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
 
-import static org.benefit.Client.mc;
-import static org.benefit.Client.restoreScreenBind;
+import static org.benefit.Benefit.mc;
+import static org.benefit.Benefit.restoreScreenBind;
 
 
 @Mixin(HandledScreen.class)
@@ -120,12 +120,12 @@ public abstract class HandledScreenMixin extends Screen {
         assert client != null;
 
         // Add in slot overlay
-        if(Client.config.getLayoutMode() != LayoutMode.NONE && Client.config.getOverlayValue()) {
-            Client.addText(context, client.textRenderer, client, this.x, this.y);
+        if(Benefit.config.getLayoutMode() != LayoutMode.NONE && Benefit.config.getOverlayValue()) {
+            Benefit.addText(context, client.textRenderer, client, this.x, this.y);
         }
 
         // Add in Sync ID and Revision on screen.
-        Client.renderTexts(context, client.textRenderer, client);
+        Benefit.renderTexts(context, client.textRenderer, client);
 
 
         if(inContainer()) textBox.render(context, mouseX, mouseY, delta);
@@ -137,8 +137,8 @@ public abstract class HandledScreenMixin extends Screen {
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         // Release any alt key and the color of the slot overlay will go away.
         final int clr = 0xFF828282;
-        if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Client.txtColor != clr)
-            Client.txtColor = clr;
+        if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Benefit.txtColor != clr)
+            Benefit.txtColor = clr;
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
@@ -151,8 +151,8 @@ public abstract class HandledScreenMixin extends Screen {
     public void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         assert client != null;
 
-        if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Client.txtColor != -1) {
-            Client.txtColor = -1;
+        if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Benefit.txtColor != -1) {
+            Benefit.txtColor = -1;
         }
 
         if (textBox.isFocused()) {
