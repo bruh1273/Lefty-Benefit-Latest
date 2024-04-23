@@ -33,6 +33,7 @@ public class Config {
         try (FileWriter fileWriter = new FileWriter(FILENAME)) {
             fileWriter.write("{\"Layout\": 1, \"Slot Overlay\": true}");
         } catch (IOException e) {
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
@@ -41,6 +42,7 @@ public class Config {
         try (FileWriter fileWriter = new FileWriter(FILENAME)) {
             fileWriter.write(String.format("{\"Layout\": %s, \"Slot Overlay\": %s}", theMode, overlayValue));
         } catch (IOException e) {
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }

@@ -10,12 +10,10 @@
     "screen.BookScreenMixin",
     "screen.ChatScreenMixin",
     "screen.HandledScreenMixin",
-    "screen.VideoOptionsScreenMixin"
+    "screen.VideoOptionsScreenMixin",
+    "sodium.SodiumGameOptionPagesMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-    "sodium.SodiumGameOptionPagesMixin"
-  ]
+  }
 }

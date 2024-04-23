@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.option.SimpleOption;
 import net.minecraft.client.util.InputUtil;
@@ -52,19 +52,18 @@ public class Benefit implements ClientModInitializer {
         });
     }
 
+    // Slot Overlay
     public static void addText(DrawContext context, TextRenderer textRenderer, MinecraftClient client, int x, int y) {
         if(client.player == null) return;
         for (int i = 0; i < client.player.currentScreenHandler.slots.size(); i++) {
             final Slot slot = client.player.currentScreenHandler.slots.get(i);
             final Text id = Text.literal(Integer.toString(slot.id));
-            context.drawText(
-                    textRenderer,
+            context.drawText(textRenderer,
                     id,
-                    (slot.x + x + 16 / 2 - textRenderer.getWidth(id) / 2),
-                    (slot.y + y + 16 / 2 - textRenderer.fontHeight / 2),
+                    slot.x + x + 16 / 2 - textRenderer.getWidth(id) / 2,
+                    slot.y + y + 16 / 2 - textRenderer.fontHeight / 2,
                     txtColor,
-                    false
-            );
+                    false);
         }
     }
 
@@ -108,6 +107,7 @@ public class Benefit implements ClientModInitializer {
                 config.setLayout(value);
                 config.save();
     });
+
 
     public static final SimpleOption<Boolean> overlay = SimpleOption.ofBoolean("benefit.overlay", SimpleOption.constantTooltip(Text.translatable("benefit.overlay.tooltip")), config.getOverlayValue(), value -> {
         config.setOverlayValue(value);

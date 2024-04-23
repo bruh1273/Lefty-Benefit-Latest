@@ -40,7 +40,7 @@ public abstract class HandledScreenMixin extends Screen {
 
     //the main method
     @Inject(at = @At("TAIL"), method = "init")
-    public void init(CallbackInfo ci) {
+    private void init(CallbackInfo ci) {
         //we're assuming that MinecraftClient.getInstance().player is never going to be equal to null when this code is ran.
         //this assert statement will not impact your game at all unless you have the JVM flag -ea or -enableassertions enabled.
         assert mc.player != null;
@@ -116,11 +116,11 @@ public abstract class HandledScreenMixin extends Screen {
     }
 
     @Inject(at = @At("RETURN"), method = "render")
-    public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         assert client != null;
 
         // Add in slot overlay
-        if(Benefit.config.getLayoutMode() != LayoutMode.NONE && Benefit.config.getOverlayValue()) {
+        if(Benefit.config.getOverlayValue()) {
             Benefit.addText(context, client.textRenderer, client, this.x, this.y);
         }
 
@@ -148,7 +148,7 @@ public abstract class HandledScreenMixin extends Screen {
     }
 
     @Inject(at = @At("HEAD"), method = "keyPressed", cancellable = true)
-    public void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+    private void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         assert client != null;
 
         if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Benefit.txtColor != -1) {
@@ -163,7 +163,7 @@ public abstract class HandledScreenMixin extends Screen {
     }
 
     @Inject(at = @At("HEAD"), method = "mouseClicked")
-    public void mouseClick(double mX, double mY, int b, CallbackInfoReturnable<Boolean> cir) {
+    private void mouseClick(double mX, double mY, int b, CallbackInfoReturnable<Boolean> cir) {
         textBox.onClick(mX, mY);
         if(textBox.mouseClicked(mX, mY, b)) textBox.setFocused(true);
         if(!textBox.mouseClicked(mX, mY, b)) textBox.setFocused(false);
@@ -174,14 +174,16 @@ public abstract class HandledScreenMixin extends Screen {
         //we're assuming that MinecraftClient.getInstance().player is never going to be null when this code is ran.
         assert mc.player != null;
 
-        //send message
-        String s = textBox.getText();
-        if (s.startsWith("/")) mc.player.networkHandler.sendChatCommand(s.substring(1));
-        else mc.player.networkHandler.sendChatMessage(s);
+        if(Benefit.config.getLayoutMode() != LayoutMode.NONE) {
+            //send message
+            String s = textBox.getText();
+            if (s.startsWith("/")) mc.player.networkHandler.sendChatCommand(s.substring(1));
+            else mc.player.networkHandler.sendChatMessage(s);
 
-        //reset state
-        textBox.setText("");
-        Variables.lastCommand = "";
+            //reset state
+            textBox.setText("");
+            Variables.lastCommand = "";
+        }
     }
 
     @Unique
@@ -191,4 +193,6 @@ public abstract class HandledScreenMixin extends Screen {
                 || mc.currentScreen instanceof ShulkerBoxScreen
                 || mc.currentScreen instanceof HopperScreen;
     }
+
+
 }

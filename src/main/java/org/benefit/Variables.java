@@ -11,7 +11,6 @@ import java.util.ArrayList;
  */
 public class Variables {
     public static boolean delayUIPackets = false;
-    public static boolean shouldEditSign = true;
     public static final ArrayList<Packet<?>> delayedPackets = new ArrayList<>();
     public static Screen storedScreen = null;
     public static ScreenHandler storedScreenHandler = null;

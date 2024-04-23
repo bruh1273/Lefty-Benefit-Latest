@@ -4,13 +4,11 @@ import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import org.benefit.Benefit;
-import org.benefit.LayoutMode;
-import org.benefit.LayoutPos;
-import org.benefit.Variables;
+import org.benefit.*;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,7 +35,7 @@ public abstract class AbstractSignEditScreenMixin extends Screen {
     private void drawButtons() {
         if(client == null || client.player == null || client.player.networkHandler == null) return;
         final int x = LayoutPos.xValue(80);
-        // Delay Close
+        // Delay Packets
         addDrawableChild(ButtonWidget.builder(Text.of("Delay packets: " + Variables.delayUIPackets), a -> {
             Variables.delayUIPackets = !Variables.delayUIPackets;
             a.setMessage(Text.literal("Delay packets: " + Variables.delayUIPackets));
@@ -63,7 +61,8 @@ public abstract class AbstractSignEditScreenMixin extends Screen {
             Variables.storedScreenHandler = client.player.currentScreenHandler;
             client.setScreen(null);
             client.player.sendMessage(Text.literal("Screen §asuccessfully §rsaved! Press §a" + Benefit.restoreScreenBind.getString() + " §rto restore it!"));
-        }).width(80)
+        }).tooltip(Tooltip.of(Text.literal("Delay packets has to be enabled in order to Save UI without updating the sign.")))
+          .width(80)
           .position(x, LayoutPos.signBaseY() - 26)
           .build());
     }
@@ -80,13 +79,9 @@ public abstract class AbstractSignEditScreenMixin extends Screen {
         final BlockPos pos = blockEntity.getPos() != null ? blockEntity.getPos() : BlockPos.ORIGIN;
         final Text signPos = Text.literal("Sign Pos: " + (pos.equals(BlockPos.ORIGIN) ? "INVALID" : pos.toShortString()));
         final int width = textRenderer.getWidth(signPos);
-        context.drawText(textRenderer,
-                signPos,
-                LayoutPos.xValue(width),
-                textY(),
-                -1,
-                false
-        );
+        context.drawText(textRenderer, signPos,
+                LayoutPos.xValue(width), textY(),
+                -1, false);
     }
 
     @Unique
