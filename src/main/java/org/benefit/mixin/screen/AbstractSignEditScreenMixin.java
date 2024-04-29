@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.benefit.*;
@@ -36,31 +37,29 @@ public abstract class AbstractSignEditScreenMixin extends Screen {
         if(client == null || client.player == null || client.player.networkHandler == null) return;
         final int x = LayoutPos.xValue(80);
         // Delay Packets
-        addDrawableChild(ButtonWidget.builder(Text.of("Delay packets: " + Variables.delayUIPackets), a -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal("Delay packets: " + Variables.delayUIPackets), button -> {
             Variables.delayUIPackets = !Variables.delayUIPackets;
-            a.setMessage(Text.literal("Delay packets: " + Variables.delayUIPackets));
+            button.setMessage(Text.literal("Delay packets: " + Variables.delayUIPackets));
             if (!Variables.delayUIPackets && !Variables.delayedPackets.isEmpty()) {
-                Variables.delayedPackets.forEach(client.player.networkHandler::sendPacket);
+                for(final Packet<?> packet : Variables.delayedPackets) {
+                    client.player.networkHandler.sendPacket(packet);
+                }
                 final String msg = String.format("§7Successfully sent §a%s §7delayed packets.", Variables.delayedPackets.size());
                 client.player.sendMessage(Text.literal(msg));
                 Variables.delayedPackets.clear();
             }
-        }).width(120)
-          .position(LayoutPos.xValue(120), LayoutPos.signBaseY())
-          .build());
+        }).width(120).position(LayoutPos.xValue(120), LayoutPos.signBaseY()).build());
 
         // Soft Close
-        addDrawableChild(ButtonWidget.builder(Text.literal("Soft Close"), a -> client.setScreen(null))
-                .width(80)
-                .position(x, LayoutPos.signBaseY() - 50)
-                .build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("Soft Close"), button -> client.setScreen(null))
+                .width(80).position(x, LayoutPos.signBaseY() - 50).build());
 
         // Save UI
-        addDrawableChild(ButtonWidget.builder(Text.literal("Save UI"), a -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal("Save UI"), button -> {
             Variables.storedScreen = client.currentScreen;
             Variables.storedScreenHandler = client.player.currentScreenHandler;
             client.setScreen(null);
-            client.player.sendMessage(Text.literal("Screen §asuccessfully §rsaved! Press §a" + Benefit.restoreScreenBind.getString() + " §rto restore it!"));
+            client.player.sendMessage(Text.literal("Screen§a successfully§r saved! Press §a" + Benefit.restoreScreenBind.getString() + " §rto restore it!"));
         }).tooltip(Tooltip.of(Text.literal("Delay packets has to be enabled in order to Save UI without updating the sign.")))
           .width(80)
           .position(x, LayoutPos.signBaseY() - 26)
@@ -80,16 +79,8 @@ public abstract class AbstractSignEditScreenMixin extends Screen {
         final Text signPos = Text.literal("Sign Pos: " + (pos.equals(BlockPos.ORIGIN) ? "INVALID" : pos.toShortString()));
         final int width = textRenderer.getWidth(signPos);
         context.drawText(textRenderer, signPos,
-                LayoutPos.xValue(width), textY(),
+                LayoutPos.xValue(width), LayoutPos.signPosY(),
                 -1, false);
     }
 
-    @Unique
-    private int textY() {
-        return switch(Benefit.config.getLayoutMode()) {
-            case TOP_LEFT, TOP_RIGHT -> 78;
-            case BOTTOM_LEFT, BOTTOM_RIGHT -> LayoutPos.signBaseY() - 64;
-            case NONE -> 9999;
-        };
-    }
 }

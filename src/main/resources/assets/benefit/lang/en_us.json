@@ -8,5 +8,7 @@
   "benefit.format.disabled":  "Disabled",
   "benefit.format.tooltip":  "Flip through this option to change the layout of Lefty's Benefit's GUI buttons.",
   "benefit.overlay": "Slot Overlay",
-  "benefit.overlay.tooltip": "Disabling this option will remove the slot overlay from your screen. Enabling it again will bring the overlay back."
+  "benefit.overlay.tooltip": "Disabling this option will remove the slot overlay from your screen. Enabling it again will bring the overlay back.",
+  "benefit.json": "Copy Json Name",
+  "benefit.json.tooltip": "With this enabled, pressing \"Get Name\" will copy the container's JSON opposed to it's default text."
 }

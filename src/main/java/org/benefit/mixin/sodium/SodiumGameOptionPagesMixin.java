@@ -24,28 +24,39 @@ import java.util.List;
 
 @Mixin(value = SodiumGameOptionPages.class, remap = false)
 public abstract class SodiumGameOptionPagesMixin {
+
     @Shadow @Final private static MinecraftOptionsStorage vanillaOpts;
+
     @Inject(at = @At("TAIL"), method = "advanced", cancellable = true)
     private static void addBenefitLayout(CallbackInfoReturnable<OptionPage> cir) {
         List<OptionGroup> groups = new ArrayList<>(cir.getReturnValue().getGroups());
         List<Option<?>> options = new ArrayList<>(cir.getReturnValue().getOptions());
+
+        options.add(2, OptionImpl.createBuilder(Boolean.TYPE, vanillaOpts)
+                .setName(Text.translatable("benefit.json"))
+                .setTooltip(Text.translatable("benefit.json.tooltip"))
+                .setBinding((option, value) -> Benefit.copyJson.setValue(value), option -> Benefit.copyJson.getValue())
+                .setControl(TickBoxControl::new)
+                .build());
+
         options.add(2, OptionImpl.createBuilder(LayoutMode.class, vanillaOpts)
                 .setName(Text.translatable("benefit.format"))
-                .setControl(ctrl -> new CyclingControl<>(ctrl, LayoutMode.class, new Text[] {
-                        Text.translatable("benefit.format.default"),
-                        Text.translatable("benefit.format.topright"),
-                        Text.translatable("benefit.format.bottomleft"),
-                        Text.translatable("benefit.format.bottomright"),
-                        Text.translatable("benefit.format.disabled")
-                })).setTooltip(Text.translatable("benefit.format.tooltip"))
-                .setBinding((opt, val) -> Benefit.format.setValue(val), opt -> Benefit.format.getValue()).build());
+                .setTooltip(Text.translatable("benefit.format.tooltip"))
+                .setBinding((option, value) -> Benefit.format.setValue(value), option -> Benefit.format.getValue())
+                .setControl(control -> new CyclingControl<>(control, LayoutMode.class, LayoutMode.translationKeys))
+                .build());
+
         options.add(2, OptionImpl.createBuilder(Boolean.TYPE, vanillaOpts)
-                .setName(Text.translatable("benefit.overlay")).setTooltip(Text.translatable("benefit.overlay.tooltip"))
+                .setName(Text.translatable("benefit.overlay"))
+                .setTooltip(Text.translatable("benefit.overlay.tooltip"))
                 .setBinding((option, value) -> Benefit.overlay.setValue(value), option -> Benefit.overlay.getValue())
-                .setControl(TickBoxControl::new).build());
+                .setControl(TickBoxControl::new)
+                .build());
+
         OptionGroup.Builder builder = OptionGroup.createBuilder();
         options.forEach(builder::add);
         groups.set(1, builder.build());
+
         cir.setReturnValue(new OptionPage(Text.translatable("sodium.options.pages.advanced"), ImmutableList.copyOf(groups)));
     }
 }

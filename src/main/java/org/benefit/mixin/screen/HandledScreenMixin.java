@@ -1,5 +1,7 @@
 package org.benefit.mixin.screen;
 
+import com.google.gson.JsonParseException;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.*;
@@ -7,6 +9,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 import net.minecraft.util.Formatting;
 import org.benefit.Benefit;
 import org.benefit.LayoutMode;
@@ -29,105 +32,96 @@ import static org.benefit.Benefit.restoreScreenBind;
 
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin extends Screen {
-    @Shadow protected int x;
-
-    @Shadow protected int y;
+    @Shadow protected int x, y;
     @Unique private TextFieldWidget textBox;
 
     protected HandledScreenMixin(Text title) {
         super(title);
     }
 
-    //the main method
+    // The main method
     @Inject(at = @At("TAIL"), method = "init")
     private void init(CallbackInfo ci) {
-        //we're assuming that MinecraftClient.getInstance().player is never going to be equal to null when this code is ran.
-        //this assert statement will not impact your game at all unless you have the JVM flag -ea or -enableassertions enabled.
         assert mc.player != null;
 
-        //simplify expressions
-        String bGray = Formatting.BOLD.toString() + Formatting.GRAY;
-        String bGreen = Formatting.BOLD.toString() + Formatting.GREEN;
+        String boldGray = Formatting.BOLD.toString() + Formatting.GRAY, boldGreen = Formatting.BOLD.toString() + Formatting.GREEN;
 
-        //add in delay packets button
-        addDrawableChild(ButtonWidget.builder(Text.of("Delay packets: " + Variables.delayUIPackets), (button) -> {
+        // Delay packets
+        addDrawableChild(ButtonWidget.builder(Text.of("Delay packets: " + Variables.delayUIPackets), button -> {
             Variables.delayUIPackets = !Variables.delayUIPackets;
 
-            //setting the text on the button to true or false when it is active
             button.setMessage(Text.of("Delay packets: " + Variables.delayUIPackets));
 
-            //condition to see if any delayed packets was delayed, then send them
             if (!Variables.delayUIPackets && !Variables.delayedPackets.isEmpty()) {
-                for (Packet<?> packet : Variables.delayedPackets)
-                    Objects.requireNonNull(mc.getNetworkHandler()).sendPacket(packet);
-
-
-                //add in message to say how many delayed packets were sent
-                int DelayedPacketsCount = Variables.delayedPackets.size();
-                mc.player.sendMessage(Text.of(bGray + "Successfully sent " + bGreen + DelayedPacketsCount + Formatting.GRAY + " delayed packets."));
+                for (final Packet<?> packet : Variables.delayedPackets) {
+                    mc.player.networkHandler.sendPacket(packet);
+                }
+                int delayedPacketsCount = Variables.delayedPackets.size();
+                mc.player.sendMessage(Text.of(boldGray + "Successfully sent " + boldGreen + delayedPacketsCount + Formatting.GRAY + " delayed packets."));
                 Variables.delayedPackets.clear();
             }
         }).width(120).position(LayoutPos.xValue(120), LayoutPos.baseY() - 120).build());
 
-        //add in softclose button
-        addDrawableChild(ButtonWidget.builder(Text.of("Soft Close"), (button) -> mc.setScreen(null))
+        // Soft Close
+        addDrawableChild(ButtonWidget.builder(Text.of("Soft Close"), button -> mc.setScreen(null))
                 .width(80).position(LayoutPos.xValue(80), LayoutPos.baseY() - 150).build());
 
-        //add in save ui button
-        addDrawableChild(ButtonWidget.builder(Text.of("Save UI"), (button) -> {
-            //define variables
+        // Save UI
+        addDrawableChild(ButtonWidget.builder(Text.of("Save UI"), button -> {
             Variables.storedScreen = mc.currentScreen;
             Variables.storedScreenHandler = mc.player.currentScreenHandler;
             mc.setScreen(null);
             mc.player.sendMessage(Text.literal("Screen §asuccessfully §rsaved! Press §a" + restoreScreenBind.getString() + " §rto restore it!"));
         }).width(80).position(LayoutPos.xValue(80), LayoutPos.baseY() - 90).build());
 
-        //add in leave n send packets button
-        addDrawableChild(ButtonWidget.builder(Text.of("Leave & send packets"), (button) -> {
-
+        // Leave & send packets
+        addDrawableChild(ButtonWidget.builder(Text.of("Leave & send packets"), button -> {
             if (!Variables.delayedPackets.isEmpty()) {
+
                 Variables.delayUIPackets = false;
 
-                for (Packet<?> packet : Variables.delayedPackets) {
-                    Objects.requireNonNull(mc.getNetworkHandler()).sendPacket(packet);
+                for(final Packet<?> packet : Variables.delayedPackets) {
+                    mc.player.networkHandler.sendPacket(packet);
                 }
-                //add in message to say how many delayed packets were sent
-                int DelayedPacketsAmount = Variables.delayedPackets.size();
-
-                //disconnect player
+                int delayedPacketsAmount = Variables.delayedPackets.size();
+                // Disconnect player
                 Objects.requireNonNull(mc.getNetworkHandler()).getConnection().disconnect(
-                        Text.of(bGray + "Disconnected, " + bGreen + DelayedPacketsAmount + bGray + " packets successfully sent."));
+                        Text.of(boldGray + "Disconnected, " + boldGreen + delayedPacketsAmount + boldGray + " packets successfully sent."));
                 Variables.delayedPackets.clear();
             }
         }).width(140).position(LayoutPos.xValue(140), LayoutPos.baseY() - 60).build());
 
-        //create input text box
+        // Get Name
+        if(inContainer()) addDrawableChild(ButtonWidget.builder(Text.of("Get Name"), button -> {
+            boolean json = Benefit.config.shouldCopyJson();
+            System.out.println(json);
+            // We can use codecs to convert anything into a DynamicOp, default ones are NBT & JSON.
+            String dfuParsed = TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, title).getOrThrow(JsonParseException::new).toString();
+            // Dispatch container's name to player in chat
+            mc.player.sendMessage(Text.literal(json ? "Container JSON: " : "Container Name: ").append(json ? Text.of(dfuParsed) : title));
+            // Automatically copy the title to clipboard when called
+            mc.keyboard.setClipboard(json ? dfuParsed : title.getString());
+        }).dimensions(LayoutPos.xValue(80), LayoutPos.getNameYPos(), 80, 20).build());
+
+        // Create input text box
         textBox = new TextFieldWidget(mc.textRenderer, LayoutPos.xValue(100), LayoutPos.sendChatYPos(), 100, 20, Text.of("Send Chat"));
         textBox.setText(Variables.lastCommand);
         textBox.setMaxLength(65535);
-
-        //render get name button
-        if(inContainer()) this.addDrawableChild(ButtonWidget.builder(Text.of("Get Name"), button -> {
-            //dispatch container's name to player in chat
-            mc.player.sendMessage(Text.literal("Container Name: ").append(title));
-            //automatically copy the title to clipboard when called
-            mc.keyboard.setClipboard(title.getString());
-        }).dimensions(LayoutPos.xValue(80), LayoutPos.getNameYPos(), 80, 20).build());
     }
 
     @Inject(at = @At("RETURN"), method = "render")
     private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         assert client != null;
 
-        // Add in slot overlay
+        // Slot Overlay
         if(Benefit.config.getOverlayValue()) {
             Benefit.addText(context, client.textRenderer, client, this.x, this.y);
         }
 
-        // Add in Sync ID and Revision on screen.
+        // Sync ID and Revision
         Benefit.renderTexts(context, client.textRenderer, client);
 
-
+        // Technical Handling
         if(inContainer()) textBox.render(context, mouseX, mouseY, delta);
         if(!textBox.isFocused() && textBox.getText().isBlank()) textBox.setSuggestion("Send Chat...");
         if(textBox.isFocused()) textBox.setSuggestion("");
@@ -136,9 +130,10 @@ public abstract class HandledScreenMixin extends Screen {
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         // Release any alt key and the color of the slot overlay will go away.
-        final int clr = 0xFF828282;
-        if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Benefit.txtColor != clr)
-            Benefit.txtColor = clr;
+        final int color = 0xFF828282;
+        if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Benefit.txtColor != color) {
+            Benefit.txtColor = color;
+        }
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
@@ -150,7 +145,6 @@ public abstract class HandledScreenMixin extends Screen {
     @Inject(at = @At("HEAD"), method = "keyPressed", cancellable = true)
     private void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         assert client != null;
-
         if(keyCode == GLFW.GLFW_KEY_LEFT_ALT || keyCode == GLFW.GLFW_KEY_RIGHT_ALT && Benefit.txtColor != -1) {
             Benefit.txtColor = -1;
         }
@@ -171,16 +165,14 @@ public abstract class HandledScreenMixin extends Screen {
 
     @Unique
     private void sendChat() {
-        //we're assuming that MinecraftClient.getInstance().player is never going to be null when this code is ran.
         assert mc.player != null;
-
         if(Benefit.config.getLayoutMode() != LayoutMode.NONE) {
-            //send message
+            // Send message
             String s = textBox.getText();
             if (s.startsWith("/")) mc.player.networkHandler.sendChatCommand(s.substring(1));
             else mc.player.networkHandler.sendChatMessage(s);
 
-            //reset state
+            // Reset state
             textBox.setText("");
             Variables.lastCommand = "";
         }

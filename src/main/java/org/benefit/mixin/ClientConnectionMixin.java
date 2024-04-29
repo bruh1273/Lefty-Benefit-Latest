@@ -2,7 +2,6 @@ package org.benefit.mixin;
 
 import net.minecraft.network.*;
 import net.minecraft.network.packet.*;
-import net.minecraft.network.PacketCallbacks;
 import net.minecraft.network.packet.c2s.play.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
@@ -13,7 +12,7 @@ import org.benefit.Variables;
 public abstract class ClientConnectionMixin {
     @Inject(at = @At("HEAD"), method = "sendImmediately", cancellable = true)
     private void sendImmediately(Packet<?> packet, PacketCallbacks callbacks, boolean flush, CallbackInfo ci) {
-        // The method to store the delayed packets
+        // Store the delayed packets
         if (Variables.delayUIPackets && (packet instanceof ClickSlotC2SPacket
                         || packet instanceof ButtonClickC2SPacket
                         || packet instanceof CloseHandledScreenC2SPacket

@@ -1,5 +1,6 @@
 package org.benefit;
 
+import net.minecraft.text.Text;
 import net.minecraft.util.TranslatableOption;
 import net.minecraft.util.function.ValueLists;
 
@@ -31,6 +32,7 @@ public enum LayoutMode implements TranslatableOption {
         return this.translationKey;
     }
 
+    @Override
     public String toString() {
         return switch(this) {
             case TOP_LEFT -> "Default";
@@ -40,7 +42,18 @@ public enum LayoutMode implements TranslatableOption {
             case NONE -> "Disabled";
         };
     }
+
+    public static final Text[] translationKeys = {
+            Text.translatable(TOP_LEFT.getTranslationKey()),
+            Text.translatable(TOP_RIGHT.getTranslationKey()),
+            Text.translatable(BOTTOM_LEFT.getTranslationKey()),
+            Text.translatable(BOTTOM_RIGHT.getTranslationKey()),
+            Text.translatable(NONE.getTranslationKey())
+    };
+
     public static LayoutMode byId(int id) {
         return BY_ID.apply(id);
     }
+
+
 }
