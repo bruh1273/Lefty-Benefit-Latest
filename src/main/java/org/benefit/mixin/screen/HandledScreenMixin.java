@@ -2,12 +2,18 @@ package org.benefit.mixin.screen;
 
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.JsonOps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
+import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextCodecs;
 import net.minecraft.util.Formatting;
@@ -24,7 +30,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.benefit.Benefit.mc;
 import static org.benefit.Benefit.restoreScreenBind;
@@ -102,6 +110,29 @@ public abstract class HandledScreenMixin extends Screen {
             // Automatically copy the title to clipboard when called
             mc.keyboard.setClipboard(json ? dfuParsed : title.getString());
         }).dimensions(LayoutPos.xValue(80), LayoutPos.getNameYPos(), 80, 20).build());
+
+        // Paper Dupe (1.20.6 - 1.21.1)
+        addDrawableChild(ButtonWidget.builder(Text.of("Paper Dupe"), button -> {
+            if(!(mc.player.getInventory().getMainHandStack().getItem()  == Items.WRITABLE_BOOK)) {
+                mc.player.sendMessage(Text.of("Please hold a writable book!"));
+                return;
+            }
+            for(int i = 9; i < 44; i++) {
+                if(36 + mc.player.getInventory().selectedSlot == i) continue;
+                mc.player.networkHandler.sendPacket(new ClickSlotC2SPacket(
+                        mc.player.currentScreenHandler.syncId,
+                        mc.player.currentScreenHandler.getRevision(),
+                        i,
+                        1,
+                        SlotActionType.THROW,
+                        ItemStack.EMPTY,
+                        Int2ObjectMaps.emptyMap()
+                ));
+            }
+            mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(
+                    mc.player.getInventory().selectedSlot, List.of("discord.gg/lefty"), Optional.of("Lefty Dupes On Fucking TOP discord.gg/lefty"
+            )));
+        }).dimensions(LayoutPos.xValue(80), LayoutPos.baseY() - 30, 80, 20).build());
 
         // Create input text box
         textBox = new TextFieldWidget(mc.textRenderer, LayoutPos.xValue(100), LayoutPos.sendChatYPos(), 100, 20, Text.of("Send Chat"));

@@ -8,7 +8,7 @@ public class LayoutPos {
     public static int baseY() {
         return switch(Benefit.config.getLayoutMode()) {
             case TOP_LEFT, TOP_RIGHT -> 190;
-            case BOTTOM_LEFT, BOTTOM_RIGHT -> win.getScaledHeight() + 36;
+            case BOTTOM_LEFT, BOTTOM_RIGHT -> win.getScaledHeight() + 6;
             case NONE -> 9999;
         };
     }
@@ -28,15 +28,15 @@ public class LayoutPos {
     }
     public static int sendChatYPos() {
         return switch(Benefit.config.getLayoutMode()) {
-            case TOP_LEFT, TOP_RIGHT -> 190;
-            case BOTTOM_LEFT, BOTTOM_RIGHT -> win.getScaledHeight() - 174;
+            case TOP_LEFT, TOP_RIGHT -> 220;
+            case BOTTOM_LEFT, BOTTOM_RIGHT -> win.getScaledHeight() - 204;
             case NONE -> 9999;
         };
     }
     public static int getNameYPos() {
         return switch(Benefit.config.getLayoutMode()) {
-            case TOP_LEFT, TOP_RIGHT -> 160;
-            case BOTTOM_LEFT, BOTTOM_RIGHT -> win.getScaledHeight() - 144;
+            case TOP_LEFT, TOP_RIGHT -> 190;
+            case BOTTOM_LEFT, BOTTOM_RIGHT -> win.getScaledHeight() - 174;
             case NONE -> 9999;
         };
     }
