@@ -34,7 +34,7 @@ public abstract class BookScreenMixin extends Screen {
         String boldGray = Formatting.BOLD.toString() + Formatting.GRAY, boldGreen = Formatting.BOLD.toString() + Formatting.GREEN;
 
         // Delay Packets
-        addDrawableChild(ButtonWidget.builder(Text.of("Delay packets: " + Variables.delayUIPackets), button -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal("Delay packets: " + Variables.delayUIPackets), button -> {
             Variables.delayUIPackets = !Variables.delayUIPackets;
 
             button.setMessage(Text.of("Delay packets: " + Variables.delayUIPackets));
@@ -44,7 +44,7 @@ public abstract class BookScreenMixin extends Screen {
                     mc.player.networkHandler.sendPacket(packet);
                 }
                 int delayedPacketsCount = Variables.delayedPackets.size();
-                mc.player.sendMessage(Text.of(boldGray + "Successfully sent " + boldGreen + delayedPacketsCount + Formatting.GRAY + " delayed packets."));
+                mc.player.sendMessage(Text.literal(boldGray + "Successfully sent " + boldGreen + delayedPacketsCount + Formatting.GRAY + " delayed packets."), false);
                 Variables.delayedPackets.clear();
             }
         }).width(120).position(LayoutPos.xValue(120), LayoutPos.baseY() - 120).build());
@@ -58,7 +58,7 @@ public abstract class BookScreenMixin extends Screen {
             Variables.storedScreen = mc.currentScreen;
             Variables.storedScreenHandler = mc.player.currentScreenHandler;
             mc.setScreen(null);
-            mc.player.sendMessage(Text.literal("Screen§a successfully§r saved! Press §a" + restoreScreenBind.getString() + " §rto restore it!"));
+            mc.player.sendMessage(Text.of("Screen§a successfully§r saved! Press §a" + restoreScreenBind.getString() + " §rto restore it!"),false);
         }).width(80).position(LayoutPos.xValue(80), LayoutPos.baseY() - 90).build());
 
         // Leave & send packets

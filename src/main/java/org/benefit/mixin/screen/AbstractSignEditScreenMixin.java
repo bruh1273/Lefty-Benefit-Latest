@@ -45,7 +45,7 @@ public abstract class AbstractSignEditScreenMixin extends Screen {
                     client.player.networkHandler.sendPacket(packet);
                 }
                 final String msg = String.format("§7Successfully sent §a%s §7delayed packets.", Variables.delayedPackets.size());
-                client.player.sendMessage(Text.literal(msg));
+                client.player.sendMessage(Text.literal(msg),false);
                 Variables.delayedPackets.clear();
             }
         }).width(120).position(LayoutPos.xValue(120), LayoutPos.signBaseY()).build());
@@ -59,7 +59,7 @@ public abstract class AbstractSignEditScreenMixin extends Screen {
             Variables.storedScreen = client.currentScreen;
             Variables.storedScreenHandler = client.player.currentScreenHandler;
             client.setScreen(null);
-            client.player.sendMessage(Text.literal("Screen§a successfully§r saved! Press §a" + Benefit.restoreScreenBind.getString() + " §rto restore it!"));
+            client.player.sendMessage(Text.literal("Screen§a successfully§r saved! Press §a" + Benefit.restoreScreenBind.getString() + " §rto restore it!"),false);
         }).tooltip(Tooltip.of(Text.literal("Delay packets has to be enabled in order to Save UI without updating the sign.")))
           .width(80)
           .position(x, LayoutPos.signBaseY() - 26)

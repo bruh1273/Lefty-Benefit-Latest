@@ -65,7 +65,7 @@ public abstract class HandledScreenMixin extends Screen {
                     mc.player.networkHandler.sendPacket(packet);
                 }
                 int delayedPacketsCount = Variables.delayedPackets.size();
-                mc.player.sendMessage(Text.of(boldGray + "Successfully sent " + boldGreen + delayedPacketsCount + Formatting.GRAY + " delayed packets."));
+                mc.player.sendMessage(Text.literal(boldGray + "Successfully sent " + boldGreen + delayedPacketsCount + Formatting.GRAY + " delayed packets."),false);
                 Variables.delayedPackets.clear();
             }
         }).width(120).position(LayoutPos.xValue(120), LayoutPos.baseY() - 120).build());
@@ -79,7 +79,7 @@ public abstract class HandledScreenMixin extends Screen {
             Variables.storedScreen = mc.currentScreen;
             Variables.storedScreenHandler = mc.player.currentScreenHandler;
             mc.setScreen(null);
-            mc.player.sendMessage(Text.literal("Screen §asuccessfully §rsaved! Press §a" + restoreScreenBind.getString() + " §rto restore it!"));
+            mc.player.sendMessage(Text.literal("Screen §asuccessfully §rsaved! Press §a" + restoreScreenBind.getString() + " §rto restore it!"),false);
         }).width(80).position(LayoutPos.xValue(80), LayoutPos.baseY() - 90).build());
 
         // Leave & send packets
@@ -106,7 +106,7 @@ public abstract class HandledScreenMixin extends Screen {
             // We can use codecs to convert anything into a DynamicOp, default ones are NBT & JSON.
             String dfuParsed = TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, title).getOrThrow(JsonParseException::new).toString();
             // Dispatch container's name to player in chat
-            mc.player.sendMessage(Text.literal(json ? "Container JSON: " : "Container Name: ").append(json ? Text.of(dfuParsed) : title));
+            mc.player.sendMessage(Text.literal(json ? "Container JSON: " : "Container Name: ").append(json ? Text.of(dfuParsed) : title),false);
             // Automatically copy the title to clipboard when called
             mc.keyboard.setClipboard(json ? dfuParsed : title.getString());
         }).dimensions(LayoutPos.xValue(80), LayoutPos.getNameYPos(), 80, 20).build());
@@ -114,7 +114,7 @@ public abstract class HandledScreenMixin extends Screen {
         // Paper Dupe (1.20.6 - 1.21.1)
         addDrawableChild(ButtonWidget.builder(Text.of("Paper Dupe"), button -> {
             if(!(mc.player.getInventory().getMainHandStack().getItem()  == Items.WRITABLE_BOOK)) {
-                mc.player.sendMessage(Text.of("Please hold a writable book!"));
+                mc.player.sendMessage(Text.of("Please hold a writable book!"),false);
                 return;
             }
             for(int i = 9; i < 44; i++) {
